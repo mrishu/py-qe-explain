@@ -339,7 +339,7 @@ if __name__ == "__main__":
     qrel_path = "trec678rb/qrels/trec678rb.qrel"
     stopwords_path = "resources/smart-stopwords"
     run_file = "idealQuery.run"
-    weights_store_file = "idealQuery_weights"
+    weights_store_file = "idealQuery.weights"
 
     iqg = IdealQueryGeneration(index_path, qrel_path, stopwords_path)
     print("Index initialized.")
