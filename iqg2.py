@@ -321,7 +321,7 @@ class IdealQueryGeneration:
                 nudged_weight = (1 + mag) * current_weight
                 rocchio_vector[term].weight = nudged_weight
                 nudged_map = self.computeMAP(query, rocchio_vector, alpha)
-                if nudged_map > current_map:
+                if nudged_map >= current_map:
                     tqdm.write(
                         f"Term: {term:20s}Nudged  Weight: {nudged_weight:.3f}, Nudged  MAP: {nudged_map:.3f} -- Keeping   Nudged Weight"
                     )
@@ -351,8 +351,8 @@ if __name__ == "__main__":
     index_path = "index-dir/trec678rb"
     qrel_path = "trec678rb/qrels/trec678rb.qrel"
     stopwords_path = "resources/smart-stopwords"
-    run_file = "idealQuery.run"
-    weights_store_file = "idealQuery.weights"
+    run_file = "idealQuery2.run"
+    weights_store_file = "idealQuery2.weights"
 
     iqg = IdealQueryGeneration(index_path, qrel_path, stopwords_path)
     print("Index initialized.")

@@ -308,7 +308,7 @@ class IdealQueryGeneration:
                 nudged_weight = (1 + mag) * current_weight
                 rocchio_vector[term].weight = nudged_weight
                 nudged_map = self.computeMAP(rocchio_vector)
-                if nudged_map > current_map:
+                if nudged_map >= current_map:
                     tqdm.write(
                         f"Term: {term:20s}Nudged  Weight: {nudged_weight:.3f}, Nudged  MAP: {nudged_map:.3f} -- Keeping   Nudged Weight"
                     )
