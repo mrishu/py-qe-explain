@@ -179,12 +179,12 @@ class IdealQueryGeneration:
         tqdm.write(f"No. of docids to traverse: {len(docids)}")
         for docid, lucene_docid in docids:
             tvec = self.termvectors.get(lucene_docid, self.CONTENT_FIELD)
-            docLen = tvec.getSumTotalTermFreq()
+            doc_len = tvec.getSumTotalTermFreq()
             tvec_iter = tvec.iterator()
             for term in BytesRefIterator.cast_(tvec_iter):
                 term_str = term.utf8ToString()
                 tf = tvec_iter.totalTermFreq()
-                weight = self.compute_bm25_weight(term_str, tf, docLen, False)
+                weight = self.compute_bm25_weight(term_str, tf, doc_len, False)
                 termstats[term_str].append(TermStat(docid, lucene_docid, tf, weight))
         tqdm.write(f"No. of terms collected: {len(termstats)}")
         return termstats
@@ -244,7 +244,7 @@ class IdealQueryGeneration:
         query_terms = parsed_query.toString(self.CONTENT_FIELD).strip().split()
         return query_terms
 
-    def expanded_query(self, rocchio_vector: dict) -> BooleanQuery:
+    def expanded_query(self, rocchio_vector: dict[str, RocchioStat]) -> BooleanQuery:
         bool_query_builder = BooleanQuery.Builder()
         for term, rocchio_stat in rocchio_vector.items():
             if not term:
@@ -293,19 +293,13 @@ class IdealQueryGeneration:
 
     def tweak_rocchio_weight_vector(
         self,
-        rocchio_vector: OrderedDict[
-            str, RocchioStat
-        ],  # should be in decreasing order of weights
+        rocchio_vector: dict[str, RocchioStat],
         tweak_magnitude_list: list[float] = [4.0, 2.0, 1.0, 0.5, 0.25],
-    ) -> OrderedDict[str, RocchioStat]:
+    ) -> dict[str, RocchioStat]:
         for mag in tweak_magnitude_list:
             for term, stat in tqdm(
                 rocchio_vector.items(), desc=f"Tweak Magnitude: {mag}"
             ):
-                if (
-                    stat.weight < 0
-                ):  # since rocchio_vector is ordered in descending order of weights, we needn't look ahead
-                    break
                 current_weight = stat.weight
                 current_map = self.computeMAP(rocchio_vector)
                 tqdm.write(
@@ -365,11 +359,11 @@ if __name__ == "__main__":
         query = TRECQuery(qid, query_text, narr)
         tqdm.write(str(query))
 
-        ## Compute initial rocchio vector
+        ## STEP 1: Compute initial rocchio vector
         tqdm.write("Computing Rocchio Vector...")
         query_rocchio_vector = iqg.compute_rocchio_vector(query, 2.0, 64.0, 64.0)
 
-        ## Remove rare terms
+        ## STEP 2: Remove rare terms
         tqdm.write("Removing rare terms...")
         # Sort it according to decreasing order of frequency in relevant documents
         query_rocchio_vector = iqg.sort_rocchio_vector(
@@ -385,24 +379,36 @@ if __name__ == "__main__":
             query_rocchio_vector, num_valid_terms
         )
 
-        ## Sort it according to decreasing order of weights
+        ## STEP 3: Sort it according to decreasing order of weights
         query_rocchio_vector = iqg.sort_rocchio_vector(query_rocchio_vector)
-        ## Trimming rocchio to terms with top 200 weights
-        num_expansion_terms = 200
-        tqdm.write(f"Trimming Rocchio Vector to top {num_expansion_terms} terms.")
+
+        ## STEP 4: Trimming rocchio to terms with top NUM_EXPANSION_TERMS weights
+        NUM_EXPANSION_TERMS = 200
+        tqdm.write(f"Trimming Rocchio Vector to top {NUM_EXPANSION_TERMS} terms.")
         query_rocchio_vector = iqg.trim_rocchio_vector(
-            query_rocchio_vector, num_expansion_terms
+            query_rocchio_vector, NUM_EXPANSION_TERMS
         )
 
-        ## Start tweaking
+        ## STEP 5: Trimming rocchio vector to reomve negative weights
+        tqdm.write("Trimming Rocchio Vector to keep positive weight terms.")
+        num_pos_terms = 0
+        for term, stat in query_rocchio_vector.items():
+            if stat.weight < 0:
+                break
+            num_pos_terms += 1
+        query_rocchio_vector = iqg.trim_rocchio_vector(
+            query_rocchio_vector, num_pos_terms
+        )
+
+        ## STEP 6: Start tweaking
         query_rocchio_vector = iqg.tweak_rocchio_weight_vector(query_rocchio_vector)
 
-        ## Store final run
+        ## STEP 7: Store final run
         tqdm.write(
             f"Final MAP: {iqg.computeMAP(query_rocchio_vector, store_run_path=run_file):.3f}"
         )
 
-        ## Store expanded query
+        ## STEP 8: Store expanded query
         iqg.store_expanded_query(query_rocchio_vector, weights_store_file)
 
         i += 1
