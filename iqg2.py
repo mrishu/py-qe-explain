@@ -161,6 +161,10 @@ class IdealQueryGeneration:
     def get_termstats(
         self, query: TRECQuery, from_relevant_docs: bool
     ) -> dict[str, list[TermStat]]:
+        """Given a query, it collects the terms from relevant/non-relevant documents.
+        It then returns a dictionary: term (str) -> list[TermStat],
+        where each TermStat contains [docid, lucene_docid, tf, and bm25_weight] of the term in document identified by docid.
+        """
         termstats = defaultdict(list)  # Maps from "term" -> List[TermStat]
         if from_relevant_docs:
             if query.qid in self.query_rel_docs_map:
@@ -283,9 +287,9 @@ class IdealQueryGeneration:
     def trim_rocchio_vector(
         self,
         rocchio_vector: OrderedDict[str, RocchioStat],
-        keep_num_terms: int = 200,
+        num_keep_terms: int = 200,
     ) -> OrderedDict[str, RocchioStat]:
-        return OrderedDict(list(rocchio_vector.items())[:keep_num_terms])
+        return OrderedDict(list(rocchio_vector.items())[:num_keep_terms])
 
     def sort_rocchio_vector(
         self,
@@ -299,7 +303,9 @@ class IdealQueryGeneration:
     def tweak_rocchio_weight_vector(
         self,
         query: TRECQuery,
-        rocchio_vector: OrderedDict[str, RocchioStat],
+        rocchio_vector: OrderedDict[
+            str, RocchioStat
+        ],  # should be in decreasing order of weights
         alpha: float,
         tweak_magnitude_list: list[float] = [4.0, 2.0, 1.0, 0.5, 0.25],
     ) -> OrderedDict[str, RocchioStat]:
@@ -382,6 +388,7 @@ if __name__ == "__main__":
 
         ## Remove rare terms from
         tqdm.write("Removing rare terms...")
+        # Sort it according to decreasing order of frequency in relevant documents
         query_rocchio_vector = iqg.sort_rocchio_vector(
             query_rocchio_vector, lambda stat: stat.doc_freq_in_rel_docs
         )
