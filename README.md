@@ -14,7 +14,7 @@ pip install pytrec_eval tqdm
 
 
 ## Some preliminary results
-- When restricted to queries 301-320 in `trec678`, the results for `iqg.py` are:
+- When restricted to queries 301-320 in `trec678`, the results for **`iqg.py`** are:
 ```
 runid                 	all	idealQuery
 num_q                 	all	20
@@ -48,7 +48,7 @@ P_500                 	all	0.1634
 P_1000                	all	0.0910
 ```
 
-- When restricted to queries 301-320 in `trec67`, the results for `iqg2.py` are:
+- When restricted to queries 301-320 in `trec678`, the results for **`iqg2.py`** are:
 ```
 runid                 	all	idealQuery
 num_q                 	all	20
