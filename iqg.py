@@ -336,6 +336,7 @@ def display_rocchio_vector(rocchio_vector: dict[str, RocchioStat], max_terms=200
 # Example usage
 if __name__ == "__main__":
     index_path = "index-dir/trec678rb"
+    queries_file = "trec678rb/topics/trec678rb.xml"
     qrel_path = "trec678rb/qrels/trec678rb.qrel"
     stopwords_path = "resources/smart-stopwords"
     run_file = "idealQuery.run"
@@ -350,7 +351,7 @@ if __name__ == "__main__":
 
     NUM_QUERIES_TO_PROCESS = 20
     i = 0
-    robust_topics = ET.parse("./trec678rb/topics/trec678rb.xml").getroot()
+    robust_topics = ET.parse(queries_file).getroot()
     for top in tqdm(robust_topics, desc="Queries Processed"):
         qid = top[0].text.strip()  # this is query number
         query_text = top[1].text.strip()  # this will be our query
