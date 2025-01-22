@@ -2,3 +2,4 @@ index-dir/
 trec678rb/
 *.run
 *.weights
+log*

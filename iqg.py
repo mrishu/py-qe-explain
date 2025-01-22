@@ -303,7 +303,7 @@ class IdealQueryGeneration:
                 current_weight = stat.weight
                 current_map = self.computeMAP(rocchio_vector)
                 tqdm.write(
-                    f"Term: {term:20s}Current Weight: {current_weight:.3f}, Current MAP: {current_map:.3f}"
+                    f"Term: {term:20s}Current Weight: {current_weight:.3f}, Current MAP: {current_map:.3f}, Tweak Magnitude: {mag}"
                 )
                 nudged_weight = (1 + mag) * current_weight
                 rocchio_vector[term].weight = nudged_weight
@@ -339,6 +339,7 @@ if __name__ == "__main__":
     queries_file = "trec678rb/topics/trec678rb.xml"
     qrel_path = "trec678rb/qrels/trec678rb.qrel"
     stopwords_path = "resources/smart-stopwords"
+
     run_file = "idealQuery.run"
     weights_store_file = "idealQuery.weights"
 
@@ -407,7 +408,9 @@ if __name__ == "__main__":
         )
 
         ## STEP 6: Start tweaking
-        query_rocchio_vector = iqg.tweak_rocchio_weight_vector(query_rocchio_vector)
+        query_rocchio_vector = iqg.tweak_rocchio_weight_vector(
+            query_rocchio_vector, tweak_magnitude_list=[4.0, 2.0, 1.0, 0.5, 0.25] * 5
+        )
 
         ## STEP 7: Store final run
         tqdm.write(

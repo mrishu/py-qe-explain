@@ -352,6 +352,7 @@ if __name__ == "__main__":
     queries_file = "trec678rb/topics/trec678rb.xml"
     qrel_path = "trec678rb/qrels/trec678rb.qrel"
     stopwords_path = "resources/smart-stopwords"
+
     run_file = "idealQuery2.run"
     weights_store_file = "idealQuery2.weights"
 
