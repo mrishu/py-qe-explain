@@ -59,7 +59,7 @@ termvecstore_TextField.setStoreTermVectors(True)
 def indexDoc(docno, text):
     doc = document.Document()
     doc.add(document.Field("id", docno, document.StringField.TYPE_STORED))
-    doc.add(document.Field("content", text, termvecstore_TextField))
+    doc.add(document.Field("contents", text, termvecstore_TextField))
     writer.addDocument(doc)
 
 

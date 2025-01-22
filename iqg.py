@@ -76,7 +76,7 @@ class TRECQuery:
 
 class IdealQueryGeneration:
     ID_FIELD = "id"
-    CONTENT_FIELD = "content"
+    CONTENT_FIELD = "contents"
     lucene_docid_cache = dict()
 
     def __init__(self, index_dir: str, qrel_path: str, stopwords_path: str) -> None:
@@ -90,8 +90,8 @@ class IdealQueryGeneration:
             self.stopwords = stopwords_file.read().strip().split()
         print("Stopwords size:", len(self.stopwords))
         self.analyzer = EnglishAnalyzer(StopFilter.makeStopSet(self.stopwords))
-        self.query_rel_docs_map = defaultdict(list)
-        self.query_non_rel_docs_map = defaultdict(list)
+        self.query_rel_docs_map = defaultdict(set)
+        self.query_non_rel_docs_map = defaultdict(set)
         self.no_of_docs = self.reader.numDocs()
         self.avg_dl = (
             self.reader.getSumTotalTermFreq(self.CONTENT_FIELD) / self.no_of_docs
@@ -126,14 +126,14 @@ class IdealQueryGeneration:
     def read_qrel(self) -> None:
         for qid, doc_wise_rel in self.qrel.items():
             for docid, rel in doc_wise_rel.items():
-                if rel == 1:
+                if rel != 0:
                     lucene_docid = self.get_lucene_docid(docid)
                     if lucene_docid != -1:
-                        self.query_rel_docs_map[qid].append((docid, lucene_docid))
+                        self.query_rel_docs_map[qid].add((docid, lucene_docid))
                 else:
                     lucene_docid = self.get_lucene_docid(docid)
                     if lucene_docid != -1:
-                        self.query_non_rel_docs_map[qid].append((docid, lucene_docid))
+                        self.query_non_rel_docs_map[qid].add((docid, lucene_docid))
 
     def get_lucene_docid(self, docid: str) -> int:
         if docid in self.lucene_docid_cache:
@@ -342,6 +342,13 @@ if __name__ == "__main__":
     run_file = "idealQuery.run"
     weights_store_file = "idealQuery.weights"
 
+    alpha = 2.0
+    beta = 64.0
+    gamma = 64.0
+
+    NUM_QUERIES_TO_PROCESS = 20
+    NUM_EXPANSION_TERMS = 200
+
     iqg = IdealQueryGeneration(index_path, qrel_path, stopwords_path)
     print("Index initialized.")
 
@@ -349,7 +356,6 @@ if __name__ == "__main__":
     print("Reading Qrel File...")
     iqg.read_qrel()
 
-    NUM_QUERIES_TO_PROCESS = 20
     i = 0
     robust_topics = ET.parse(queries_file).getroot()
     for top in tqdm(robust_topics, desc="Queries Processed"):
@@ -362,7 +368,7 @@ if __name__ == "__main__":
 
         ## STEP 1: Compute initial rocchio vector
         tqdm.write("Computing Rocchio Vector...")
-        query_rocchio_vector = iqg.compute_rocchio_vector(query, 2.0, 64.0, 64.0)
+        query_rocchio_vector = iqg.compute_rocchio_vector(query, alpha, beta, gamma)
 
         ## STEP 2: Remove rare terms
         tqdm.write("Removing rare terms...")
@@ -384,7 +390,6 @@ if __name__ == "__main__":
         query_rocchio_vector = iqg.sort_rocchio_vector(query_rocchio_vector)
 
         ## STEP 4: Trimming rocchio to terms with top NUM_EXPANSION_TERMS weights
-        NUM_EXPANSION_TERMS = 200
         tqdm.write(f"Trimming Rocchio Vector to top {NUM_EXPANSION_TERMS} terms.")
         query_rocchio_vector = iqg.trim_rocchio_vector(
             query_rocchio_vector, NUM_EXPANSION_TERMS
