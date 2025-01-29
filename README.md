@@ -89,43 +89,53 @@ mkdir collections
 tar -xvzf trec678rb.tar.gz
 mv trec678rb collections
 ```
-### 2. Index the dataset using [indexer_trec678rb.py](indexer_trec678rb.py).
+### 2. Index the dataset.
 ```
 python indexer_trec678rb.py
 ```
+An index will be created `indexed/trec678rb`.
+
 ### 3. Generate a run file of top 1000 documents by standard BM25 retrieval.
 ```
 python searcher.py
 ```
+This will produce a run file `test-runs/bm25.run`.
+
 ### 4. Intersect the generated run file with the original qrel file to produce a qrel file containing only documents that occurred in the top 1000 standard BM25 retrieval.
 ```
 python intersect_run_with_qrel.py test-runs/bm25.run qrels/trec678.qrels qrels/bm25_intersect_trec678rb.qrel
 ```
-### 5. Generating Ideal Query weights:
+This will produce a (restricted) `qrel` file `qrels/bm25_intersect_trec678rb.qrel`.
+
+### 5. Generating Ideal Query:
 1. Way 1 (without parallelization but clean output):
 ```
-python iqg.py extracted-queries/trec678 --runid ideal-query-restrict
+python iqg.py extracted-queries/trec678 --runid ideal_query_restrict
 ```
-This produces a files called:
-  - A run file: `ideal-queries/trec678/runs/ideal-query-restrict.run`
-  - A term_weights file: `ideal-queries/trec678/weights/ideal-query-restrict.term_weights`
+This produces two files:
+  - A `run` file: `ideal-queries/trec678/runs/ideal_query_restrict.run`
+  - A `term_weights` file: `ideal-queries/trec678/weights/ideal_query_restrict.term_weights`
 
 2. Way 2 (with parallelization):
 ```
-./parallel_ideal_query_computer 12
+./parallel_ideal_query_computer <number of jobs>
 ```
-where 12 can be replaced by number of parallel jobs.
+where `<number of jobs>` can be replaced by number of parallel jobs.
 
-This produces two directories:
-- A run directory: `ideal-queries/trec678/runs/ideal-query-restrict-split/`
-- A term_weights directory: `ideal-queries/trec678/weights/ideal-query-restrict-split/`
-These split directories will contain runs and term_weights for each query respectively.
+This produces two "split" directories:
+- A split `run` directory: `ideal-queries/trec678/runs/ideal_query_restrict-split/`
+- A split `term_weights` directory: `ideal-queries/trec678/weights/ideal_query_restrict-split/`
 
-These can then be merged:
+These split directories will contain `run`s and `term_weight`s for each query separately. These can then be merged into single `run` and `term_weights` files using `split_dir_merger.py`:
 ```
-python split_dir_merger.py ideal-queries/trec678/runs/ideal-query-restrict-split ideal-queries/trec678/runs/ideal-query-restrict.run
+python split_dir_merger.py ideal-queries/trec678/runs/ideal_query_restrict-split ideal-queries/trec678/runs/ideal_query_restrict.run
 ```
 and 
 ```
-python split_dir_merger.py ideal-queries/trec678/weights/ideal-query-restrict-split ideal-queries/trec678/weights/ideal-query-restrict.weights
+python split_dir_merger.py ideal-queries/trec678/weights/ideal_query_restrict-split ideal-queries/trec678/weights/ideal_query_restrict.term_weights
+```
+An `ap` file for the ideal query run can be produced by:
+```
+mkdir ideal-queries/trec678/aps/
+trec_eval -m map -q qrels/trec678rb.qrel ideal-queries/trec678/runs/ideal-query-restrict.run > ideal-queries/trec678/ap/ideal_query_restrict.ap
 ```
