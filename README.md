@@ -103,6 +103,7 @@ that occurred in the top 1000 standard BM25 retrieval.
 python intersect_run_with_qrel.py test-runs/bm25.run qrels/trec678.qrels qrels/bm25_intersect_trec678rb.qrel
 ```
 5. Generating Ideal Query weights:
+
   1. Way 1 (without parallelization but clean output):
   ```
   python iqg.py extracted-queries/trec678 --runid ideal-query-restrict
