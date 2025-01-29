@@ -8,7 +8,7 @@ fi
 
 expanded_queries_dir=expanded-queries/trec678
 
-parallel --line-buffer --tag -j$num_jobs 'python run_ap_generator.py {}' ::: $expanded_queries_dir/rm3/weights/* \
+parallel --line-buffer --tag -j$num_jobs 'python3 run_ap_generator.py {}' ::: $expanded_queries_dir/rm3/weights/* \
   $expanded_queries_dir/spl/weights/* \
   $expanded_queries_dir/ceqe/weights/* \
   $expanded_queries_dir/loglogistic/weights/*

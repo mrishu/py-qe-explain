@@ -91,26 +91,26 @@ mv trec678rb collections
 ```
 ### 2. Index the dataset.
 ```
-python indexer_trec678rb.py
+python3 indexer_trec678rb.py
 ```
 An index will be created `indexed/trec678rb`.
 
 ### 3. Generate a `run` file of top 1000 documents retrieved by standard BM25 retrieval.
 ```
-python searcher.py
+python3 searcher.py
 ```
 This will produce a `run` file `test-runs/bm25.run`.
 
 ### 4. Intersect the generated `run` file with the original `qrel` file to produce a `qrel` file containing only documents that occurred in the top 1000 standard BM25 retrieval.
 ```
-python intersect_run_with_qrel.py test-runs/bm25.run qrels/trec678rb.qrel qrels/bm25_intersect_trec678rb.qrel
+python3 intersect_run_with_qrel.py test-runs/bm25.run qrels/trec678rb.qrel qrels/bm25_intersect_trec678rb.qrel
 ```
 This will produce a (restricted) `qrel` file `qrels/bm25_intersect_trec678rb.qrel`.
 
 ### 5. Generating Ideal Query:
 1. Way 1 (without parallelization but clean output):
 ```
-python iqg.py extracted-queries/trec678 --runid ideal_query_restrict
+python3 iqg.py extracted-queries/trec678 --runid ideal_query_restrict
 ```
 This produces two files:
   - A `run` file: `ideal-queries/trec678/runs/ideal_query_restrict.run`
@@ -128,11 +128,11 @@ This produces two "split" directories:
 
 These split directories will contain `run`s and `term_weight`s for each query separately. These can then be merged into single `run` and `term_weights` files using `split_dir_merger.py`:
 ```
-python split_dir_merger.py ideal-queries/trec678/runs/ideal_query_restrict-split ideal-queries/trec678/runs/ideal_query_restrict.run
+python3 split_dir_merger.py ideal-queries/trec678/runs/ideal_query_restrict-split ideal-queries/trec678/runs/ideal_query_restrict.run
 ```
 and 
 ```
-python split_dir_merger.py ideal-queries/trec678/weights/ideal_query_restrict-split ideal-queries/trec678/weights/ideal_query_restrict.term_weights
+python3 split_dir_merger.py ideal-queries/trec678/weights/ideal_query_restrict-split ideal-queries/trec678/weights/ideal_query_restrict.term_weights
 ```
 An `ap` file for the ideal query run can be produced by:
 ```
@@ -160,6 +160,6 @@ where `<number of jobs>` can be replaced by number of parallel jobs. (Default: 1
 I have not written them, just changed the i/o filenames. These are the same files as you had given:
 ```
 cd similarity-correlation
-python compute-correlation-mm.py <similarity measure>
+python3 compute-correlation-mm.py <similarity measure>
 ```
 where `<similarity measure>` can be have the values: `'j', 'j1', 'j2', 'l1', 'l2', 'n', 'n1', 'n2'`
