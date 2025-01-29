@@ -99,9 +99,9 @@ An index will be created `indexed/trec678rb`.
 ```
 python searcher.py
 ```
-This will produce a run file `test-runs/bm25.run`.
+This will produce a `run` file `test-runs/bm25.run`.
 
-### 4. Intersect the generated run file with the original qrel file to produce a qrel file containing only documents that occurred in the top 1000 standard BM25 retrieval.
+### 4. Intersect the generated `run` file with the original `qrel` file to produce a `qrel` file containing only documents that occurred in the top 1000 standard BM25 retrieval.
 ```
 python intersect_run_with_qrel.py test-runs/bm25.run qrels/trec678rb.qrel qrels/bm25_intersect_trec678rb.qrel
 ```
@@ -145,10 +145,10 @@ The expanded queries (`tar.gz`) can be downloaded from the above Google Drive li
 
 It includes the `run` and `ap` file for each expanded query. Extract using:
 ```
-tar -xvzf expanded_queries.tar.gz
+tar -xvzf expanded-queries.tar.gz
 ```
 
-To generate `run` and `ap` files:  
+To generate `run` and `ap` files (not needed as `expanded-queries.tar.gz` contains `run`s and `ap`s):  
 I have taken the expanded queries provided by Sourav Da and generated `run` and `ap` files for them using the script `run_ap_generator.py`.  
 This can also be easily parallelized using the script `parallel_run_ap_computer`.
 ```
