@@ -84,4 +84,7 @@ P_1000                	all	0.0910
 
 # Steps to reproduce
 1. Download the dataset from [here](https://drive.google.com/file/d/19qkzLYnz7NiE4KeqO9ZQ2YGtSB9QBcL1/view?usp=sharing)
-2. Index the dataset using [index.py](index.py).
+2. Index the dataset using [indexer_trec678rb.py](indexer_trec678rb.py).
+```
+python indexer_trec678rb.py
+```
