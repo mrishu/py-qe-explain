@@ -11,7 +11,7 @@ Apart from [pylucene-10.0.0](https://dlcdn.apache.org/lucene/pylucene/), the dep
 ```bash
 pip install pytrec_eval tqdm
 ```
-
+An additional dependency is GNU `parallel`. It should be available on standard repository of any Linux distribution.
 
 ## Some preliminary results
 - When restricted to queries 301-320 in `trec678`, the results for **`iqg.py`** are:
