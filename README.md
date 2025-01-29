@@ -103,7 +103,7 @@ This will produce a run file `test-runs/bm25.run`.
 
 ### 4. Intersect the generated run file with the original qrel file to produce a qrel file containing only documents that occurred in the top 1000 standard BM25 retrieval.
 ```
-python intersect_run_with_qrel.py test-runs/bm25.run qrels/trec678.qrels qrels/bm25_intersect_trec678rb.qrel
+python intersect_run_with_qrel.py test-runs/bm25.run qrels/trec678rb.qrels qrels/bm25_intersect_trec678rb.qrel
 ```
 This will produce a (restricted) `qrel` file `qrels/bm25_intersect_trec678rb.qrel`.
 
