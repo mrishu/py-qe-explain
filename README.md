@@ -142,7 +142,11 @@ trec_eval -m map -q qrels/trec678rb.qrel ideal-queries/trec678/runs/ideal-query-
 
 ### 6. Expanded queries: [Link](https://drive.google.com/file/d/1OcH57z-IqLs2bVgw5rKXiD5XkzhrgmFy/view?usp=sharing)
 The expanded queries (`tar.gz`) can be downloaded from the above Google Drive link.
-It includes the `run` and `ap` file for each expanded query.
+
+It includes the `run` and `ap` file for each expanded query. Extract using:
+```
+tar -xvzf expanded_queries.tar.gz
+```
 
 To generate `run` and `ap` files:  
 I have taken the expanded queries provided by Sourav Da and generated `run` and `ap` files for them using the script `run_ap_generator.py`.  
@@ -153,3 +157,9 @@ This can also be easily parallelized using the script `parallel_run_ap_computer`
 where `<number of jobs>` can be replaced by number of parallel jobs. (Default: 12)
 
 ### 7. Computing similarity and correlation
+I have not written them, just changed the i/o filenames. These are the same files as you had given:
+```
+cd similarity-correlation
+python compute-correlation-mm.py <similarity measure>
+```
+where `<similarity measure>` can be have the values: `'j', 'j1', 'j2', 'l1', 'l2', 'n', 'n1', 'n2'`
