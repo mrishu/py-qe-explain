@@ -120,7 +120,7 @@ This produces two files:
 ```
 ./parallel_ideal_query_computer <number of jobs>
 ```
-where `<number of jobs>` can be replaced by number of parallel jobs.
+where `<number of jobs>` can be replaced by number of parallel jobs. (Default: 12)
 
 This produces two "split" directories:
 - A split `run` directory: `ideal-queries/trec678/runs/ideal_query_restrict-split/`
@@ -139,3 +139,8 @@ An `ap` file for the ideal query run can be produced by:
 mkdir ideal-queries/trec678/aps/
 trec_eval -m map -q qrels/trec678rb.qrel ideal-queries/trec678/runs/ideal-query-restrict.run > ideal-queries/trec678/ap/ideal_query_restrict.ap
 ```
+
+### 6. Expanded queries
+The expanded queries (`tar.gz`) can be downloaded from this Google Drive link: [expanded-queries](https://drive.google.com/file/d/1OcH57z-IqLs2bVgw5rKXiD5XkzhrgmFy/view?usp=sharing). It includes the `run` and `ap` file for each expanded query.
+I have taken the expanded queries provided by Sourav Da and generated `run` and `ap` files for them using the script `run_ap_generator.py`.
+This can also be easily parallelized using the script `parallel_run_ap_computer`.
