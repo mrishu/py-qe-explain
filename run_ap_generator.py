@@ -27,10 +27,11 @@ searcher = SearchAndEval(TREC_INDEX_DIR_PATH, STOPWORDS_FILE_PATH, TREC_QREL_FIL
 print("Index initialized")
 
 query_vectors = parse_queries(args.weight_file)
+num_terms = int(args.weight_file.split("-")[1])  # for trimming of longer query_vectors
 
 for qid, query_vector in query_vectors.items():
     print(f"Running Query {qid}")
-    query_vector.trim(200)  # trim upto top 200 terms
+    query_vector.trim(num_terms)  # trim upto top num_terms terms
     ap, run = searcher.computeAP(qid, query_vector)
     ap_dict = dict()
     ap_dict[qid] = ap
