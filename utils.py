@@ -11,7 +11,7 @@ def create_file_dir(file_path: str) -> None:
 
 
 # Input:
-# qrel: Dictionary containing the mapping "qid" -> ("docid" -> relevance)
+# qrel: Dictionary containing the mapping dict("qid" -> dict(("docid" -> relevance))
 # qrel_output_path: Path to save the qrel file
 def store_qrel(qrel: dict[str, dict[str, int]], qrel_output_path: str, append=False):
     create_file_dir(qrel_output_path)
@@ -23,7 +23,7 @@ def store_qrel(qrel: dict[str, dict[str, int]], qrel_output_path: str, append=Fa
 
 
 # Input:
-# run: Dictionary containing the mapping "qid" -> ("docid" -> score)
+# run: Dictionary containing the mapping dict("qid" -> OrderedDict("docid" -> score))
 # run_output_path: Path to save the run file
 # runid: Run identifier
 def store_run(
@@ -40,7 +40,7 @@ def store_run(
 
 
 # Input:
-# aps: Dictionary containing the mapping "qid" -> AP
+# aps: Dictionary containing the mapping dict("qid" -> AP)
 # ap_file_path: Path to the AP file
 def store_ap(aps: dict[str, float], ap_file_path: str, append=False):
     create_file_dir(ap_file_path)
@@ -52,8 +52,8 @@ def store_ap(aps: dict[str, float], ap_file_path: str, append=False):
 
 # Input:
 # weight_file_path: Path to the weight file
-# Output: Dictionary containing the mapping "qid" -> QueryVector
-# Each QueryVector is (basically) a dictionary mapping "term" -> weight
+# Output: Dictionary containing the mapping dict("qid" -> QueryVector)
+# Each QueryVector is (basically) a dictionary mapping dict("term" -> weight)
 def parse_queries(weight_file_path: str) -> dict[str, QueryVector]:
     with open(weight_file_path, "r") as f:
         query_vectors = defaultdict(QueryVector)
@@ -71,7 +71,7 @@ def parse_queries(weight_file_path: str) -> dict[str, QueryVector]:
 
 # Input:
 # ap_file_path: Path to the AP file
-# Output: Dictionary containing the mapping "qid" -> AP
+# Output: Dictionary containing the mapping dict("qid" -> AP)
 def parse_ap(ap_file_path: str) -> dict[str, float]:
     aps = dict()
     with open(ap_file_path, "r") as f:

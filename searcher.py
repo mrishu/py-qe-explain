@@ -1,6 +1,7 @@
 ## Library imports
 import re
 import csv
+from collections import OrderedDict
 
 ## Extra imports
 import pytrec_eval
@@ -53,7 +54,7 @@ class SearchAndEval:
         query_text = re.sub(r'[/|,|"]', " ", query_text)
         query = QueryParser(CONTENTS_FIELD, self.analyzer).parse(query_text)
         top_docs = self.searcher.search(query, k)
-        results = dict()
+        results = OrderedDict()  # results are already sorted by score
         for hit in top_docs.scoreDocs:
             doc = self.storedfields.document(hit.doc)
             docid = doc.get(ID_FIELD)
@@ -63,7 +64,7 @@ class SearchAndEval:
 
     def search(self, query: Query, k: int = 1000) -> dict[str, float]:
         top_docs = self.searcher.search(query, k)
-        results = dict()
+        results = OrderedDict()  # results are already sorted by score
         for hit in top_docs.scoreDocs:
             lucene_docid = hit.doc
             doc = self.storedfields.document(lucene_docid)
