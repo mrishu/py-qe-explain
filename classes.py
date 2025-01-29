@@ -4,6 +4,7 @@ from types import SimpleNamespace
 from typing import Union
 
 from definitions import CONTENTS_FIELD
+from utils import create_file_dir
 
 ## Lucene imports
 from org.apache.lucene.index import Term
@@ -45,6 +46,7 @@ class QueryVector:
         return len(self.vector)
 
     def store(self, qid, store_path: str, append=True) -> None:
+        create_file_dir(store_path)
         self.sort()  # always sort according to weight before storing
         with open(store_path, "a" if append else "w") as store_file:
             writer = csv.writer(store_file, delimiter="\t")

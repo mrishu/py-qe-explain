@@ -9,3 +9,4 @@ expanded-queries/
 **/*.log
 test-runs/
 similarity-correlation/matches*
+trec678rb.tar.gz
