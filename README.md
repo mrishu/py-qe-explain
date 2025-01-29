@@ -152,7 +152,7 @@ To generate `run` and `ap` files (not needed as `expanded-queries.tar.gz` contai
 I have taken the expanded queries provided by Sourav Da and generated `run` and `ap` files for them using the script `run_ap_generator.py`.  
 This can also be easily parallelized using the script `parallel_run_ap_computer`.
 ```
-./parallel_run_ap_computer <number of jobs>
+./parallel_run_ap_generator <number of jobs>
 ```
 where `<number of jobs>` can be replaced by number of parallel jobs. (Default: 12)
 
