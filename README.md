@@ -95,7 +95,7 @@ python indexer_trec678rb.py
 ```
 An index will be created `indexed/trec678rb`.
 
-### 3. Generate a run file of top 1000 documents by standard BM25 retrieval.
+### 3. Generate a `run` file of top 1000 documents retrieved by standard BM25 retrieval.
 ```
 python searcher.py
 ```
