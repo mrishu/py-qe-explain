@@ -108,7 +108,7 @@ python3 intersect_run_with_qrel.py test-runs/bm25.run qrels/trec678rb.qrel qrels
 This will produce a (restricted) `qrel` file `qrels/bm25_intersect_trec678rb.qrel`.
 
 ### 5. Ideal Query: [Link](https://drive.google.com/file/d/1f2nzHYwQEDosw5UQQ4MtA-fm1mihNFLS/view?usp=sharing)
-The expanded queries (`tar.gz`) can be downloaded from the above Google Drive link.  
+The ideal queries (`tar.gz`) can be downloaded from the above Google Drive link.  
 It includes the `term_weights`, `run` and `ap` file for each ideal queries. Extract using:
 ```
 tar -xvzf ideal-queries.tar.gz
