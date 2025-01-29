@@ -8,5 +8,5 @@ expanded-queries/
 **/*.run
 **/*.log
 test-runs/
-similarity-correlation/matches*
+similarity-correlation/output*
 **/*.tar.gz

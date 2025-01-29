@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 from itertools import product
+import os
+from pathlib import Path
 
-ROOT_DIR = "/home/adi/projects/py-qe-explain/"
+ROOT_DIR = os.path.join(Path(".").absolute().parent)
 
 
 @dataclass
@@ -22,7 +24,7 @@ term_weight_file["ideal"] = (
 
 # Files containing AP achieved by ideal / expanded query
 ap_file = dict()
-ap_file["ideal"] = ROOT_DIR + "/ideal-queries/trec678/aps/ideal_query_retrict.ap"
+ap_file["ideal"] = ROOT_DIR + "/ideal-queries/trec678/aps/ideal_query_restrict.ap"
 
 # Aliases
 ideal_query_path = term_weight_file["ideal"]
