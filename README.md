@@ -9,7 +9,7 @@ Apart from [pylucene-10.0.0](https://dlcdn.apache.org/lucene/pylucene/), the dep
 1. [pytrec_eval](https://github.com/cvangysel/pytrec_eval)
 2. tqdm (For progress bars)
 ```bash
-pip install pytrec_eval tqdm
+pip install pytrec_eval tqdm scipy numpy
 ```
 An additional dependency is GNU `parallel`. It should be available on standard repository of any Linux distribution.
 
