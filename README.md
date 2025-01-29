@@ -107,7 +107,14 @@ python3 intersect_run_with_qrel.py test-runs/bm25.run qrels/trec678rb.qrel qrels
 ```
 This will produce a (restricted) `qrel` file `qrels/bm25_intersect_trec678rb.qrel`.
 
-### 5. Generating Ideal Query:
+### 5. Ideal Query: [Link](https://drive.google.com/file/d/1f2nzHYwQEDosw5UQQ4MtA-fm1mihNFLS/view?usp=sharing)
+The expanded queries (`tar.gz`) can be downloaded from the above Google Drive link.  
+It includes the `term_weights`, `run` and `ap` file for each ideal queries. Extract using:
+```
+tar -xvzf ideal-queries.tar.gz
+```
+
+#### Generating ideal queries
 1. Way 1 (without parallelization but clean output):
 ```
 python3 iqg.py extracted-queries/trec678 --runid ideal_query_restrict
@@ -141,14 +148,13 @@ trec_eval -m map -q qrels/trec678rb.qrel ideal-queries/trec678/runs/ideal_query_
 ```
 
 ### 6. Expanded queries: [Link](https://drive.google.com/file/d/1OcH57z-IqLs2bVgw5rKXiD5XkzhrgmFy/view?usp=sharing)
-The expanded queries (`tar.gz`) can be downloaded from the above Google Drive link.
-
-It includes the `run` and `ap` file for each expanded query. Extract using:
+The expanded queries (`tar.gz`) can be downloaded from the above Google Drive link.  
+It includes the `term_weights`, `run` and `ap` file for each expanded query. Extract using:
 ```
 tar -xvzf expanded-queries.tar.gz
 ```
 
-To generate `run` and `ap` files (not needed as `expanded-queries.tar.gz` contains `run`s and `ap`s):  
+#### Generating `run` and `ap` files (not needed if downloading)
 I have taken the expanded queries provided by Sourav Da and generated `run` and `ap` files for them using the script `run_ap_generator.py`.  
 This can also be easily parallelized using the script `parallel_run_ap_computer`.
 ```
