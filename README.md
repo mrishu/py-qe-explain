@@ -109,7 +109,7 @@ This will produce a (restricted) `qrel` file `qrels/bm25_intersect_trec678rb.qre
 
 ### 5. Ideal Query: [Link](https://drive.google.com/file/d/1f2nzHYwQEDosw5UQQ4MtA-fm1mihNFLS/view?usp=sharing)
 The ideal queries (`tar.gz`) can be downloaded from the above Google Drive link.  
-It includes the `term_weights`, `run` and `ap` file for each ideal queries. Extract using:
+It includes the `term_weights`, `run` and `ap` file for each ideal query. Extract using:
 ```
 tar -xvzf ideal-queries.tar.gz
 ```
@@ -155,7 +155,7 @@ tar -xvzf expanded-queries.tar.gz
 ```
 
 #### Generating `run` and `ap` files (not needed if downloading)
-I have taken the expanded queries provided by Sourav Da and generated `run` and `ap` files for them using the script `run_ap_generator.py`.  
+I have taken the expanded queries weights ((link)[https://drive.google.com/file/d/1PutRi-rUFQ0a4QfJ157lfHK1VXOmf3hk/view?usp=sharing]) provided by Sourav Da and generated `run` and `ap` files for them using the script `run_ap_generator.py`.  
 This can also be easily parallelized using the script `parallel_run_ap_computer`.
 ```
 ./parallel_run_ap_generator <number of jobs>
