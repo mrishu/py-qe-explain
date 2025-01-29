@@ -8,13 +8,13 @@ from utils import parse_queries, store_run, store_ap
 from definitions import TREC_INDEX_DIR_PATH, STOPWORDS_FILE_PATH, TREC_QREL_FILE_PATH
 
 
-"""Expected input: term_weights file stored in 'weights' folder
-Expected output: run file, ap file in corresponding 'runs' and 'aps' folder besides the 'weights' folder """
+"""
+Expected input: term_weights file stored in 'weights' folder
+Expected output: run file, ap file in corresponding 'runs' and 'aps' folder beside the 'weights' folder
+"""
 
 parser = argparse.ArgumentParser()
 parser.add_argument("weight_file", help="Query Weight File", type=str)
-# parser.add_argument("store_run_file", help="File to store run", type=str)
-# parser.add_argument("store_ap_file", help="File to store ap", type=str)
 args = parser.parse_args()
 runid = re.sub(r"\.term_weights", "", os.path.basename(args.weight_file))
 

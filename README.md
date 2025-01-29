@@ -144,6 +144,7 @@ trec_eval -m map -q qrels/trec678rb.qrel ideal-queries/trec678/runs/ideal-query-
 The expanded queries (`tar.gz`) can be downloaded from the above Google Drive link.
 It includes the `run` and `ap` file for each expanded query.
 
+To generate `run` and `ap` files:  
 I have taken the expanded queries provided by Sourav Da and generated `run` and `ap` files for them using the script `run_ap_generator.py`.  
 This can also be easily parallelized using the script `parallel_run_ap_computer`.
 ```
