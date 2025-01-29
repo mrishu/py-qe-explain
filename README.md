@@ -97,8 +97,7 @@ python indexer_trec678rb.py
 ```
 python searcher.py
 ```
-### 4. Intersect the generated run file with the original qrel file to produce a qrel file containing only documents
-that occurred in the top 1000 standard BM25 retrieval.
+### 4. Intersect the generated run file with the original qrel file to produce a qrel file containing only documents that occurred in the top 1000 standard BM25 retrieval.
 ```
 python intersect_run_with_qrel.py test-runs/bm25.run qrels/trec678.qrels qrels/bm25_intersect_trec678rb.qrel
 ```
