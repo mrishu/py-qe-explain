@@ -17,12 +17,12 @@ class Pair:
 # File names containing ideal / expanded query term-weights
 term_weight_file = dict()
 term_weight_file["ideal"] = (
-    ROOT_DIR + "/ideal-queries/trec678/weights/ideal_query.term_weights"
+    ROOT_DIR + "/ideal-queries/trec678/weights/ideal_query_restrict.term_weights"
 )
 
 # Files containing AP achieved by ideal / expanded query
 ap_file = dict()
-ap_file["ideal"] = ROOT_DIR + "/ideal-queries/trec678/aps/ideal_query.ap"
+ap_file["ideal"] = ROOT_DIR + "/ideal-queries/trec678/aps/ideal_query_retrict.ap"
 
 # Aliases
 ideal_query_path = term_weight_file["ideal"]
