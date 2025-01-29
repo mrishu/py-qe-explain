@@ -1,0 +1,3 @@
+#!/bin/sh
+
+parallel --line-buffer --tag -j$1 'python iqg.py {} --split' ::: extracted-queries/trec678-split/*

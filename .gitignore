@@ -1,0 +1,11 @@
+**/__pycache__
+collections/
+indexed/
+ideal-queries/
+expanded-queries/
+**/*.term_weights
+**/*.ap
+**/*.run
+**/*.log
+test-runs/
+similarity-correlation/matches*
