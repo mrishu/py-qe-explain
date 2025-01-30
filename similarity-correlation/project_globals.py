@@ -3,7 +3,10 @@ from itertools import product
 import os
 from pathlib import Path
 
-ROOT_DIR = os.path.join(Path(".").absolute().parent)
+ROOT_DIR = os.path.join(
+    Path(os.path.dirname(os.path.realpath(__file__))).absolute().parent
+)
+
 
 
 @dataclass
