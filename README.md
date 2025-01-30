@@ -120,7 +120,7 @@ python3 split_dir_merger.py ideal-queries/trec678/weights/ideal_query_restrict-s
 Generate the `ap` file:
 ```bash
 mkdir ideal-queries/trec678/aps/
-trec_eval -m map -q qrels/trec678rb.qrel ideal-queries/trec678/runs/ideal_query_restrict.run > ideal-queries/trec678/ap/ideal_query_restrict.ap
+trec_eval -m map -q qrels/trec678rb.qrel ideal-queries/trec678/runs/ideal_query_restrict.run > ideal-queries/trec678/aps/ideal_query_restrict.ap
 ```
 
 ---
