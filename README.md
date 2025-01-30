@@ -123,7 +123,7 @@ mkdir -p ideal-queries/trec678/aps/
 trec_eval -m map -q qrels/trec678rb.qrel ideal-queries/trec678/runs/ideal_query_restrict.run > ideal-queries/trec678/aps/ideal_query_restrict.ap
 sed -Ei 's/[[:blank:]]+/\t/g' ideal-queries/trec678/aps/*
 ```
-(_The last line makes sure that for each line in the generated ap file, there is only one tabspace as the delimeter. This is required for `csv.writer` with delimiter `\t` to work._)
+(_The last line makes sure that for each line in the generated ap file, there is only one tabspace as the delimeter. This is required for `csv.reader` with delimiter `\t` to work._)
 
 ---
 
