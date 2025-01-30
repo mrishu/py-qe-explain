@@ -61,7 +61,7 @@ These steps describe how to generate a restricted ground truth using only the re
 ### 1. Download and Extract the Dataset
 Download the dataset from the provided link, extract it, and move it to a directory named `collections`:
 ```bash
-mkdir collections
+mkdir -p collections
 tar -xvzf trec678rb.tar.gz
 mv trec678rb collections
 ```
@@ -119,7 +119,7 @@ python3 split_dir_merger.py ideal-queries/trec678/weights/ideal_query_restrict-s
 
 Generate the `ap` file:
 ```bash
-mkdir ideal-queries/trec678/aps/
+mkdir -p ideal-queries/trec678/aps/
 trec_eval -m map -q qrels/trec678rb.qrel ideal-queries/trec678/runs/ideal_query_restrict.run > ideal-queries/trec678/aps/ideal_query_restrict.ap
 sed -Ei 's/[[:blank:]]+/\t/g' ideal-queries/trec678/aps/*  # all lines have delimiter a single tabspace
 ```
