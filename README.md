@@ -121,6 +121,7 @@ Generate the `ap` file:
 ```bash
 mkdir ideal-queries/trec678/aps/
 trec_eval -m map -q qrels/trec678rb.qrel ideal-queries/trec678/runs/ideal_query_restrict.run > ideal-queries/trec678/aps/ideal_query_restrict.ap
+sed -Ei 's/[[:blank:]]+/\t/g' ideal-queries/trec678/aps/*  # all lines have delimiter a single tabspace
 ```
 
 ---
