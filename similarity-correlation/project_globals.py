@@ -8,7 +8,6 @@ ROOT_DIR = os.path.join(
 )
 
 
-
 @dataclass
 class Pair:
     runid: int
