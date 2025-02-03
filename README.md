@@ -155,4 +155,33 @@ python3 compute-correlation-mm.py <similarity_measure>
 where `<similarity_measure>` can be one of:
 `'j', 'j1', 'j2', 'l1', 'l2', 'n', 'n1', 'n2'`.
 
+---
+
 # Results
+## `jaccard` Similarity
+| Correlation | Vanilla Ideal Query | Restricted Ideal Query |
+|-------------|---------------------|------------------------|
+| Pearson     | 0.27530978584589544 | 0.26719890865599216 |
+| Kendall     | 0.2039317057781643 | 0.19527271741380392 |
+| Spearman    | 0.2804058431142231 | 0.2676524936238417 |
+
+## `l1` similarity
+| Correlation | Vanilla Ideal Query | Restricted Ideal Query |
+|-------------|---------------------|------------------------|
+| Pearson     | -0.021846086059143458 | -0.013452476593593514 |
+| Kendall     | -0.07218926465331622 | -0.06674220854442578 |
+| Spearman    | -0.10172536810824717 | -0.09632707167480746 |
+
+## `l2` similarity
+| Correlation | Vanilla Ideal Query | Restricted Ideal Query |
+|-------------|---------------------|------------------------|
+| Pearson     | 0.3035792866335904 | 0.2983063348444898 |
+| Kendall     | 0.29638548155480743 | 0.2845539556187513 |
+| Spearman    | 0.39024597207486517 | 0.37373457259699033 |
+
+## `ndcg_modified2` similarity
+| Correlation | Vanilla Ideal Query | Restricted Ideal Query |
+|-------------|---------------------|------------------------|
+| Pearson     | 0.023741949357671686 | 0.03337957897785733 |
+| Kendall     | 0.05391125458798632 | 0.050904183098999765 |
+| Spearman    | 0.07306139152559063 | 0.06812348885506235 |
