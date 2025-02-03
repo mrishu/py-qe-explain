@@ -84,6 +84,8 @@ python3 intersect_run_with_qrel.py test-runs/bm25.run qrels/trec678rb.qrel qrels
 ```
 This produces a restricted `qrel` file: `qrels/bm25_intersect_trec678rb.qrel`.
 
+**NOTE**: In `iqg.py`, `restrict_qrel_path` can be modified to point to the restricted `qrel` file.
+
 ---
 
 ## Ideal Queries
@@ -124,6 +126,9 @@ trec_eval -m map -q qrels/trec678rb.qrel ideal-queries/trec678/runs/ideal_query_
 sed -Ei 's/[[:blank:]]+/\t/g' ideal-queries/trec678/aps/*
 ```
 (_The last line makes sure that for each line in the generated ap file, there is only one tabspace as the delimeter. This is required for `csv.reader` with delimiter `\t` to work._)
+
+**NOTE**: In `similarity-correlation/project_globals.py`, `term_weight_file["idea"]` and `ap_file["ideal"]`
+can be changed to point to appropriate ideal query files.
 
 ---
 
@@ -179,7 +184,7 @@ where `<similarity_measure>` can be one of:
 | Kendall     | 0.29638548155480743 | 0.2845539556187513 |
 | Spearman    | 0.39024597207486517 | 0.37373457259699033 |
 
-## `ndcg_modified2` similarity
+## `ndcg_modified_2` similarity
 | Correlation | Vanilla Ideal Query | Restricted Ideal Query |
 |-------------|---------------------|------------------------|
 | Pearson     | 0.023741949357671686 | 0.03337957897785733 |
