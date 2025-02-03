@@ -37,8 +37,8 @@ from org.apache.lucene.util import BytesRefIterator
 """Overall Procedure:
 1. Construct `query_rel_docs_map`, `query_non_rel_docs_map` dictionaries using the function `_read_restrict_qrel()` function
     from the `restrict_qrel_path` file.
-    `query_rel_docs_map` is a dictionary mapping from `qid` -> `list[docid]` of relevant documents.
-    `query_non_rel_docs_map` is a dictionary mapping from `qid` -> `list[docid]` of non-relevant documents.
+    - `query_rel_docs_map` is a dictionary mapping from `qid` -> `list[docid]` of relevant documents.
+    - `query_non_rel_docs_map` is a dictionary mapping from `qid` -> `list[docid]` of non-relevant documents.
     These two dictionaries are computed for the whole `IdealQueryGeneration` instance once.
 2. For each query, initial Rocchio vector is computed using the `compute_rocchio_vector()` function.
     - The Rocchio vector will essentially be a dictionary mapping from `term` -> `weight`. And this `weight` will be computed as:
@@ -47,27 +47,27 @@ from org.apache.lucene.util import BytesRefIterator
        + beta * average of `term` weights in relevant documents
        - gamma * average of `term` weights in non-relevant documents,
       ```
-      where `term`s varies over all terms.
-      (Since, weight < 0 is not allowed, we can safely ignore terms that don't occur in the query or the relevant documents.)
+      where `term`s ideally varies over all possible terms.
+      (But since, weight < 0 is not allowed, we can safely ignore terms that don't occur in the query or the relevant documents.)
 3. Inside `compute_rocchio_vector()` function:
-    1. We first invoke the `_get_termstats function()` to get the term statistics from relevant/non-relevant documents.
-    This function first collects all the terms occuring in the relevant/non-relevant documents and then 
-    returns a dictionary "term" -> list[(docid, weight)], here `weight` is the BM25 weight of the `term` in the document identified by `docid`.
-    These are collected as `query_termstats_rel` and `query_termstats_non_rel` dictionaries for relevant/non-relevant documents respectively.
+    1. We first invoke the `_get_termstats()` function to get the "term statistics" from relevant/non-relevant documents.
+        This function first collects all the terms occuring in the relevant/non-relevant documents and then 
+        returns a dictionary "term" -> list[(docid, weight)]. Here `weight` is the BM25 weight of the `term` in the document identified by `docid`.
+        These are collected as `query_termstats_rel` and `query_termstats_non_rel` dictionaries for relevant/non-relevant documents respectively.
     2. We then go over all `term`s in `query_termstats_rel` and compute the Rocchio vector `weight` of `term` by:
-    ```
-    rel_avg_weight = avg(weights in query_termstats_rel[term])
-    non_rel_avg_weight = avg(weights in query_termstats_non_rel[term])
-    rocchio_vector[term] = alpha * weight of term in query + beta * rel_avg_weight - gamma * non_rel_avg_weight
-    ```
+        ```
+        rel_avg_weight = avg(weights in query_termstats_rel[term])
+        non_rel_avg_weight = avg(weights in query_termstats_non_rel[term])
+        rocchio_vector[term] = alpha * weight of term in query + beta * rel_avg_weight - gamma * non_rel_avg_weight
+        ```
     3. This dictionary `rocchio_vector` is then returned.
 4. After the `rocchio_vector` for a query is computed, we tweak the weights of each `term` to increase the MAP as much as possible.
-    We go over the `tweak_magnitude_list = [4.0, 2.0, 1.0, 0.5, 0.25]`, and for each `term` in the `rocchio_vector`,
-        - We first select the `tweak_magnitude`.
-        - We tweak the weight of each `term` by multipyling by `(1 + tweak_magnitude)`.  
-          If the MAP increases, we keep the modified `weight` otherwise we restore it.
+    We select a `tweak_magnitude` from the `tweak_magnitude_list = [4.0, 2.0, 1.0, 0.5, 0.25]`, and for each `term` in the `rocchio_vector`,
+        - We tweak the `weight` of each `term` by multipyling it by `(1 + tweak_magnitude)`.  
+            If the MAP increases, we keep the modified `weight` otherwise we restore it.
         - At the end after all `term`s have been processed, we select the next `tweak_magnitude` and repeat the above process.
-    After all `tweak_magnitude`s from `tweak_magnitude_list` have been processed, we return the final tweaked Rocchio vector.
+    After all `tweak_magnitude`s from `tweak_magnitude_list` have been processed, we return the final tweaked Rocchio vector
+    as the "Ideal Query" for the query.
 """
 
 
