@@ -127,7 +127,7 @@ sed -Ei 's/[[:blank:]]+/\t/g' ideal-queries/trec678/aps/*
 ```
 (_The last line makes sure that for each line in the generated ap file, there is only one tabspace as the delimeter. This is required for `csv.reader` with delimiter `\t` to work._)
 
-**NOTE**: In `similarity-correlation/project_globals.py`, `term_weight_file["idea"]` and `ap_file["ideal"]`
+**NOTE**: In `similarity-correlation/project_globals.py`, `term_weight_file["ideal"]` and `ap_file["ideal"]`
 can be changed to point to appropriate ideal query files.
 
 ---
