@@ -86,7 +86,7 @@ This produces a restricted `qrel` file: `qrels/bm25_intersect_trec678rb.qrel`.
 
 ---
 
-# Ideal Queries
+## Ideal Queries
 [Download Ideal Queries](https://drive.google.com/file/d/1f2nzHYwQEDosw5UQQ4MtA-fm1mihNFLS/view?usp=sharing)
 
 ### Extracting the Ideal Queries
@@ -127,7 +127,7 @@ sed -Ei 's/[[:blank:]]+/\t/g' ideal-queries/trec678/aps/*
 
 ---
 
-# Expanded Queries
+## Expanded Queries
 [Download Expanded Queries](https://drive.google.com/file/d/1OcH57z-IqLs2bVgw5rKXiD5XkzhrgmFy/view?usp=sharing)
 
 ### Extracting the Expanded Queries
@@ -146,7 +146,7 @@ Parallel computation can be done using:
 
 ---
 
-# Computing Similarity and Correlation
+## Computing Similarity and Correlation
 No modifications were made to these scripts apart from input/output filenames. The similarity-correlation computations can be run as follows:
 ```bash
 cd similarity-correlation
@@ -154,3 +154,5 @@ python3 compute-correlation-mm.py <similarity_measure>
 ```
 where `<similarity_measure>` can be one of:
 `'j', 'j1', 'j2', 'l1', 'l2', 'n', 'n1', 'n2'`.
+
+# Results
