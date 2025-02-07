@@ -1,9 +1,5 @@
 # Query Expansion Explanation
 
-## Dataset
-The dataset required for this project can be downloaded from the following link:  
-[Dataset Link](https://drive.google.com/file/d/19qkzLYnz7NiE4KeqO9ZQ2YGtSB9QBcL1/view?usp=sharing)
-
 ## Dependencies
 This project depends on several packages, including:
 - [pylucene-10.0.0](https://dlcdn.apache.org/lucene/pylucene/)
