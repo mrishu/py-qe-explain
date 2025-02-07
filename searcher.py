@@ -47,8 +47,8 @@ class SearchAndEval:
             stopwords = stopwords_file.read().strip().split()
         self.analyzer = EnglishAnalyzer(StopFilter.makeStopSet(stopwords))
         with open(qrel_path, "r") as qrel_file:
-            self.actual_qrel = pytrec_eval.parse_qrel(qrel_file)
-        self.qrel_evaluator = pytrec_eval.RelevanceEvaluator(self.actual_qrel, {"map"})
+            self.qrel = pytrec_eval.parse_qrel(qrel_file)
+        self.qrel_evaluator = pytrec_eval.RelevanceEvaluator(self.qrel, {"map"})
 
     def raw_search(self, query_text: str, k: int) -> dict[str, float]:
         query_text = re.sub(r'[/|,|"]', " ", query_text)
