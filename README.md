@@ -115,6 +115,8 @@ python3 split_dir_merger.py ideal-queries/trec678/runs/ideal_query_restrict-spli
 python3 split_dir_merger.py ideal-queries/trec678/weights/ideal_query_restrict-split ideal-queries/trec678/weights/ideal_query_restrict.term_weights
 ```
 
+---
+
 Generate the `ap` file:
 ```bash
 mkdir -p ideal-queries/trec678/aps/
@@ -136,7 +138,7 @@ can be changed to point to appropriate ideal query files.
 tar -xvzf expanded-queries.tar.gz
 ```
 
-### Generating `run` and `ap` Files (Optional)
+### Generating `run` and `ap` Files
 Expanded query weights were taken provided by Sourav Da ([expanded-queries-weights-only](https://drive.google.com/file/d/1PutRi-rUFQ0a4QfJ157lfHK1VXOmf3hk/view?usp=sharing))  and `run` and `ap` files were generated using `run_ap_generator.py`.
 
 Parallel computation can be done using:
