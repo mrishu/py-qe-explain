@@ -34,8 +34,10 @@ from org.apache.lucene.index import Term
 from org.apache.lucene.queryparser.classic import QueryParser
 from org.apache.lucene.util import BytesRefIterator
 
-"""Overall Procedure:
-1. Construct `query_rel_docs_map`, `query_non_rel_docs_map` dictionaries using the function `_read_restrict_qrel()` function
+"""
+# Overall Procedure:
+1. Construct `query_rel_docs_map`, `query_non_rel_docs_map` dictionaries
+    using the function `_read_restrict_qrel()` function
     from the `restrict_qrel_path` file.
     - `query_rel_docs_map` is a dictionary mapping from `qid` -> `list[docid]` of relevant documents.
     - `query_non_rel_docs_map` is a dictionary mapping from `qid` -> `list[docid]` of non-relevant documents.
@@ -44,18 +46,19 @@ from org.apache.lucene.util import BytesRefIterator
     - The Rocchio vector will essentially be a dictionary mapping from `term` -> `weight`.
       And this `weight` will be computed as:
       ```
-       alpha * weight of `term` in query
-       + beta * average of `term` weights in relevant documents
-       - gamma * average of `term` weights in non-relevant documents,
+       alpha * term BM25 weight in query
+       + beta * average of term BM25 weights in relevant documents
+       - gamma * average of term BM25 weights in non-relevant documents,
       ```
       where `term`s ideally varies over all possible terms.
-      (But since, weight < 0 is not allowed, we can safely ignore terms that don't occur in the query or the relevant documents.)
+      But since, weight < 0 is not allowed, we can safely ignore terms that don't occur in the query or the relevant documents.
 3. Inside `compute_rocchio_vector()` function:
     1. We first invoke the `_get_termstats()` function to get the "term statistics" from relevant/non-relevant documents.
-        This function first collects all the terms occuring in the relevant/non-relevant documents and then 
-        returns a dictionary "term" -> list[(docid, weight)]. Here `weight` is the BM25 weight of the `term` in the document identified by `docid`.
+        This function collects all the terms occuring in the relevant/non-relevant documents and then
+        returns dictionaries mapping from "term" -> list[(docid, weight)] for relevant and non-relevant documents separately.
+        Here `weight` is the BM25 weight of the `term` in the document identified by `docid`.
         These are collected as `query_termstats_rel` and `query_termstats_non_rel` dictionaries for relevant/non-relevant documents respectively.
-    2. We then go over all `term`s in `query_termstats_rel` (as considering only `term`s that occur in relevant documents)
+    2. We then go over all `term`s in `query_termstats_rel` (as we are considering only `term`s that occur in relevant documents)
        and compute the Rocchio vector `weight` of `term` by:
        ```
        rel_avg_weight = avg(weights in query_termstats_rel[term])
@@ -64,7 +67,7 @@ from org.apache.lucene.util import BytesRefIterator
        ```
     3. This dictionary `rocchio_vector` is then returned.
 4. After the `rocchio_vector` for a query is computed, we tweak the weights of each `term` to increase the MAP as much as possible.
-    We select a `tweak_magnitude` from the `tweak_magnitude_list = [4.0, 2.0, 1.0, 0.5, 0.25]`, and for each `term` in the `rocchio_vector`,
+    We select a `tweak_magnitude` from the `tweak_magnitude_list = [4.0, 2.0, 1.0, 0.5, 0.25]`. Then,
         - We tweak the `weight` of each `term` by multipyling it by `(1 + tweak_magnitude)`.  
             If the MAP increases, we keep the modified `weight` otherwise we restore it.
         - At the end after all `term`s have been processed, we select the next `tweak_magnitude` and repeat the above process.
@@ -180,8 +183,8 @@ class IdealQueryGeneration(SearchAndEval):
         gamma: float,
     ) -> QueryVector:
         query_terms = set(self._get_query_terms(query))
-        query_termstats_rel = self._get_termstats(query, True)
-        query_termstats_non_rel = self._get_termstats(query, False)
+        query_termstats_rel = self._get_termstats(query, from_relevant_docs=True)
+        query_termstats_non_rel = self._get_termstats(query, from_relevant_docs=False)
         rocchio_vector = QueryVector()
         for term, rel_stats in query_termstats_rel.items():
             if term in query_terms:
@@ -252,7 +255,7 @@ class IdealQueryGeneration(SearchAndEval):
 
     def generate(
         self,
-        parsed_queries_path: str,
+        extracted_queries_path: str,
         weights_store_path: str,
         run_store_path: str,
         alpha=2.0,
@@ -263,7 +266,7 @@ class IdealQueryGeneration(SearchAndEval):
         num_top_docs=1000,
         tweak_magnitude_list=[4.0, 2.0, 1.0, 0.5, 0.25],
     ):
-        query_reader = csv.reader(open(parsed_queries_path, "r"), delimiter="\t")
+        query_reader = csv.reader(open(extracted_queries_path, "r"), delimiter="\t")
         for row in query_reader:
             qid = row[0]
             query_text = row[1]
@@ -272,14 +275,16 @@ class IdealQueryGeneration(SearchAndEval):
 
             ## STEP 1: Compute initial rocchio vector
             print("Computing Rocchio Vector...")
-            query_rocchio_vector = iqg.compute_rocchio_vector(query, alpha, beta, gamma)
+            query_rocchio_vector = self.compute_rocchio_vector(
+                query, alpha, beta, gamma
+            )
 
             ## STEP 2: Remove rare terms
             print("Removing rare terms...")
             # Sort it according to decreasing order of frequency in relevant documents
             query_rocchio_vector.sort(lambda stat: stat.rel_docs_freq)
             num_valid_terms = 0
-            min_threshold = 0.02 * len(iqg.query_rel_docs_map[query.qid])
+            min_threshold = 0.02 * len(self.query_rel_docs_map[query.qid])
             for term, stat in query_rocchio_vector.vector.items():
                 if stat.rel_docs_freq < min_threshold:
                     break
@@ -294,14 +299,14 @@ class IdealQueryGeneration(SearchAndEval):
             query_rocchio_vector.trim(num_expansion_terms)
 
             ## STEP 5: Start tweaking
-            query_rocchio_vector = iqg.tweak_query_vector(
+            query_rocchio_vector = self.tweak_query_vector(
                 query,
                 query_rocchio_vector,
                 tweak_magnitude_list=tweak_magnitude_list,
             )
 
             ## STEP 6: Compute final AP and final run
-            final_ap, final_run = iqg.computeAP(
+            final_ap, final_run = self.computeAP(
                 query.qid, query_rocchio_vector, num_top_docs
             )
             print(f"Final MAP: {final_ap:.3f}")
