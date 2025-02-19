@@ -204,7 +204,7 @@ class IdealQueryGeneration(SearchAndEval):
                 1, len(query_termstats_non_rel)
             )
             weight += beta * rel_avg_weight - gamma * non_rel_avg_weight
-            if weight < 0:  # don't add term to rocchio vector if weight < 0
+            if weight <= 0:  # don't add term to rocchio vector if weight <= 0
                 continue
             rocchio_vector[term] = SimpleNamespace(
                 weight=weight, rel_docs_freq=len(query_termstats_rel[term])
@@ -217,7 +217,7 @@ class IdealQueryGeneration(SearchAndEval):
                     1, len(query_termstats_non_rel)
                 )
                 weight -= gamma * non_rel_avg_weight
-                if weight < 0:  # dont't add term if weight < 0
+                if weight <= 0:  # dont't add term if weight <= 0
                     continue
             rocchio_vector[term] = SimpleNamespace(
                 weight=weight, rel_docs_freq=len(query_termstats_rel[term])
