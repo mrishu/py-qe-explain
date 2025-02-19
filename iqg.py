@@ -228,17 +228,15 @@ class IdealQueryGeneration(SearchAndEval):
         query_vector: QueryVector,
         tweak_magnitude_list: list[float] = [4.0, 2.0, 1.0, 0.5, 0.25],
     ) -> QueryVector:
+        current_map, _ = self.computeAP(query.qid, query_vector)
+        if current_map is None:  # if relevance not present in qrel, nothing to do
+            return query_vector
         for mag in tweak_magnitude_list:
             for term, stat in query_vector.vector.items():
                 current_weight = stat.weight
-                current_map, _ = self.computeAP(query.qid, query_vector)
-                if current_map is None:
-                    return query_vector
                 tqdm.write(
                     f"Term: {term:20s}Current Weight: {current_weight:.3f}, Current AP: {current_map:.3f}, Tweak Magnitude: {mag}"
                 )
-                if current_map == 1.0:
-                    return query_vector
                 nudged_weight = (1 + mag) * current_weight
                 query_vector[term].weight = nudged_weight
                 nudged_map, _ = self.computeAP(query.qid, query_vector)
@@ -246,11 +244,14 @@ class IdealQueryGeneration(SearchAndEval):
                     tqdm.write(
                         f"Term: {term:20s}Nudged  Weight: {nudged_weight:.3f}, Nudged  AP: {nudged_map:.3f} -- Keeping   Nudged Weight"
                     )
+                    current_map = nudged_map
+                    if current_map == 1.0:  # stop computing if MAP is already 1
+                        return query_vector
                 else:
-                    query_vector[term].weight = current_weight
                     tqdm.write(
                         f"Term: {term:20s}Nudged  Weight: {nudged_weight:.3f}, Nudged  AP: {nudged_map:.3f} -- Reverting Nudged Weight"
                     )
+                    query_vector[term].weight = current_weight
         return query_vector
 
     def generate(
