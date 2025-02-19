@@ -240,6 +240,7 @@ class IdealQueryGeneration(SearchAndEval):
                 nudged_weight = (1 + mag) * current_weight
                 query_vector[term].weight = nudged_weight
                 nudged_map, _ = self.computeAP(query.qid, query_vector)
+                assert nudged_map is not None
                 if nudged_map >= current_map:
                     tqdm.write(
                         f"Term: {term:20s}Nudged  Weight: {nudged_weight:.3f}, Nudged  AP: {nudged_map:.3f} -- Keeping   Nudged Weight"
