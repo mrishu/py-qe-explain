@@ -156,7 +156,9 @@ class IdealQueryGeneration(SearchAndEval):
             # if there are no non-relevant docs for the query, then return empty dictionary
             else:
                 return termstats
-        print(f"No. of docids to traverse: {len(docids)}")
+        print(
+            f"No. of {"" if from_relevant_docs else "non-"}relevant docs: {len(docids)}"
+        )
         for docid, lucene_docid in docids:
             tvec = self.termvectors.get(lucene_docid, CONTENTS_FIELD)
             doc_len = tvec.getSumTotalTermFreq()
