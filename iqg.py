@@ -9,6 +9,7 @@ import xml.etree.ElementTree as ET
 import csv
 import argparse
 import pickle
+import logging
 
 ## Extra imports
 import pytrec_eval
@@ -34,40 +35,35 @@ from org.apache.lucene.index import Term
 from org.apache.lucene.queryparser.classic import QueryParser
 from org.apache.lucene.util import BytesRefIterator
 
-"""
-# Overall Procedure:
-1. Construct `query_rel_docs_map`, `query_non_rel_docs_map` dictionaries
-    using the function `_read_restrict_qrel()` function
+"""Overall Procedure:
+1. Construct `query_rel_docs_map`, `query_non_rel_docs_map` dictionaries using the function `_read_restrict_qrel()` function
     from the `restrict_qrel_path` file.
     - `query_rel_docs_map` is a dictionary mapping from `qid` -> `list[docid]` of relevant documents.
     - `query_non_rel_docs_map` is a dictionary mapping from `qid` -> `list[docid]` of non-relevant documents.
     These two dictionaries are computed for the whole `IdealQueryGeneration` instance once.
 2. For each query, initial Rocchio vector is computed using the `compute_rocchio_vector()` function.
-    - The Rocchio vector will essentially be a dictionary mapping from `term` -> `weight`.
-      And this `weight` will be computed as:
+    - The Rocchio vector will essentially be a dictionary mapping from `term` -> `weight`. And this `weight` will be computed as:
       ```
-       alpha * term BM25 weight in query
-       + beta * average of term BM25 weights in relevant documents
-       - gamma * average of term BM25 weights in non-relevant documents,
+       alpha * weight of `term` in query
+       + beta * average of `term` weights in relevant documents
+       - gamma * average of `term` weights in non-relevant documents,
       ```
       where `term`s ideally varies over all possible terms.
-      But since, weight < 0 is not allowed, we can safely ignore terms that don't occur in the query or the relevant documents.
+      (But since, weight < 0 is not allowed, we can safely ignore terms that don't occur in the query or the relevant documents.)
 3. Inside `compute_rocchio_vector()` function:
     1. We first invoke the `_get_termstats()` function to get the "term statistics" from relevant/non-relevant documents.
-        This function collects all the terms occuring in the relevant/non-relevant documents and then
-        returns dictionaries mapping from "term" -> list[(docid, weight)] for relevant and non-relevant documents separately.
-        Here `weight` is the BM25 weight of the `term` in the document identified by `docid`.
+        This function first collects all the terms occuring in the relevant/non-relevant documents and then 
+        returns a dictionary "term" -> list[(docid, weight)]. Here `weight` is the BM25 weight of the `term` in the document identified by `docid`.
         These are collected as `query_termstats_rel` and `query_termstats_non_rel` dictionaries for relevant/non-relevant documents respectively.
-    2. We then go over all `term`s in `query_termstats_rel` (as we are considering only `term`s that occur in relevant documents)
-       and compute the Rocchio vector `weight` of `term` by:
-       ```
-       rel_avg_weight = avg(weights in query_termstats_rel[term])
-       non_rel_avg_weight = avg(weights in query_termstats_non_rel[term])
-       rocchio_vector[term] = alpha * weight of term in query + beta * rel_avg_weight - gamma * non_rel_avg_weight
-       ```
+    2. We then go over all `term`s in `query_termstats_rel` and compute the Rocchio vector `weight` of `term` by:
+        ```
+        rel_avg_weight = avg(weights in query_termstats_rel[term])
+        non_rel_avg_weight = avg(weights in query_termstats_non_rel[term])
+        rocchio_vector[term] = alpha * weight of term in query + beta * rel_avg_weight - gamma * non_rel_avg_weight
+        ```
     3. This dictionary `rocchio_vector` is then returned.
 4. After the `rocchio_vector` for a query is computed, we tweak the weights of each `term` to increase the MAP as much as possible.
-    We select a `tweak_magnitude` from the `tweak_magnitude_list = [4.0, 2.0, 1.0, 0.5, 0.25]`. Then,
+    We select a `tweak_magnitude` from the `tweak_magnitude_list = [4.0, 2.0, 1.0, 0.5, 0.25]`, and for each `term` in the `rocchio_vector`,
         - We tweak the `weight` of each `term` by multipyling it by `(1 + tweak_magnitude)`.  
             If the MAP increases, we keep the modified `weight` otherwise we restore it.
         - At the end after all `term`s have been processed, we select the next `tweak_magnitude` and repeat the above process.
@@ -92,21 +88,24 @@ class IdealQueryGeneration(SearchAndEval):
         self.query_rel_docs_map = defaultdict(set)
         self.query_non_rel_docs_map = defaultdict(set)
         if restrict_qrel_path is None:
-            restrict_qrel_path = actual_qrel_path
-        with open(restrict_qrel_path, "r") as qrel_file:
-            self.restrict_qrel = pytrec_eval.parse_qrel(qrel_file)
-        if os.path.exists(restrict_qrel_path + ".pkl"):
-            self.query_rel_docs_map, self.query_non_rel_docs_map = pickle.load(
-                open(restrict_qrel_path + ".pkl", "rb")
-            )
+            self.restrict_qrel_path = actual_qrel_path
         else:
-            self._read_restrict_qrel()
-            pickle.dump(
-                (self.query_rel_docs_map, self.query_non_rel_docs_map),
-                open(restrict_qrel_path + ".pkl", "wb"),
-            )
+            self.restrict_qrel_path = restrict_qrel_path
+        with open(self.restrict_qrel_path, "r") as qrel_file:
+            self.restrict_qrel = pytrec_eval.parse_qrel(qrel_file)
+        self._read_restrict_qrel()
 
     def _read_restrict_qrel(self) -> None:
+        pickle_dir = self.restrict_qrel_path + "-pickles"
+        os.makedirs(pickle_dir, exist_ok=True)
+        if os.path.exists(os.path.join(pickle_dir, "query-docs-map.pkl")):
+            with open(
+                os.path.join(pickle_dir, "query-docs-map.pkl"), "rb"
+            ) as pickle_file:
+                self.query_rel_docs_map, self.query_non_rel_docs_map = pickle.load(
+                    pickle_file
+                )
+            return
         for qid, doc_wise_rel in self.restrict_qrel.items():
             for docid, rel in doc_wise_rel.items():
                 if rel != 0:
@@ -117,6 +116,11 @@ class IdealQueryGeneration(SearchAndEval):
                     lucene_docid = self.get_lucene_docid(docid)
                     if lucene_docid != -1:
                         self.query_non_rel_docs_map[qid].add((docid, lucene_docid))
+        with open(os.path.join(pickle_dir, "query-docs-map.pkl"), "wb") as pickle_file:
+            pickle.dump(
+                (self.query_rel_docs_map, self.query_non_rel_docs_map),
+                pickle_file,
+            )
 
     def _get_query_terms(self, query: TRECQuery) -> list[str]:
         query_text = re.sub(r'[/|,|"]', " ", query.text)
@@ -138,13 +142,17 @@ class IdealQueryGeneration(SearchAndEval):
     def _get_termstats(
         self, query: TRECQuery, from_relevant_docs: bool
     ) -> dict[str, list[SimpleNamespace]]:
-        """Given a query, it collects the terms from relevant/non-relevant documents.
+        """Given a query, it collects the terms from relevant (if from_relevant_docs is True) / non-relevant documents.
         It then returns a dictionary: term (str) -> list[SimpleNamespace],
         where each SimpleNamespace has term statistics containing
         [docid, lucene_docid, tf, and bm25_weight] of the term in document identified by docid.
         """
+        pickles_dir = self.restrict_qrel_path + "-pickles"
+        termstats_dir = os.path.join(pickles_dir, "termstats")
+        os.makedirs(termstats_dir, exist_ok=True)
         termstats = defaultdict(list)  # Maps from "term" -> list[TermStat]
         if from_relevant_docs:
+            # check if query.qid is in query_rel_docs_map
             if query.qid in self.query_rel_docs_map:
                 docids = self.query_rel_docs_map[query.qid]
             # if there are no relevant docs for the query, then return empty dictionary
@@ -156,24 +164,38 @@ class IdealQueryGeneration(SearchAndEval):
             # if there are no non-relevant docs for the query, then return empty dictionary
             else:
                 return termstats
-        print(
-            f"No. of {"" if from_relevant_docs else "non-"}relevant docs: {len(docids)}"
-        )
-        for docid, lucene_docid in docids:
-            tvec = self.termvectors.get(lucene_docid, CONTENTS_FIELD)
-            doc_len = tvec.getSumTotalTermFreq()
-            tvec_iter = tvec.iterator()
-            for term in BytesRefIterator.cast_(tvec_iter):
-                term_str = term.utf8ToString()
-                tf = tvec_iter.totalTermFreq()
-                weight = self._compute_bm25_weight(
-                    term_str, tf, doc_len, is_query_term=False
-                )
-                termstats[term_str].append(
-                    SimpleNamespace(
-                        docid=docid, lucene_docid=lucene_docid, tf=tf, weight=weight
+        print(f"No. of docids to traverse: {len(docids)}")
+        if from_relevant_docs:
+            termstats_file = os.path.join(termstats_dir, f"{query.qid}-rel.pkl")
+        else:
+            termstats_file = os.path.join(termstats_dir, f"{query.qid}-non-rel.pkl")
+        if os.path.exists(termstats_file):
+            with open(
+                termstats_file,
+                "rb",
+            ) as pickle_file:
+                termstats = pickle.load(pickle_file)
+        else:
+            for docid, lucene_docid in docids:
+                tvec = self.termvectors.get(lucene_docid, CONTENTS_FIELD)
+                doc_len = tvec.getSumTotalTermFreq()
+                tvec_iter = tvec.iterator()
+                for term in BytesRefIterator.cast_(tvec_iter):
+                    term_str = term.utf8ToString()
+                    tf = tvec_iter.totalTermFreq()
+                    weight = self._compute_bm25_weight(
+                        term_str, tf, doc_len, is_query_term=False
                     )
-                )
+                    termstats[term_str].append(
+                        SimpleNamespace(
+                            docid=docid, lucene_docid=lucene_docid, tf=tf, weight=weight
+                        )
+                    )
+            with open(
+                termstats_file,
+                "wb",
+            ) as pickle_file:
+                pickle.dump(termstats, pickle_file)
         tqdm.write(f"No. of terms collected: {len(termstats)}")
         return termstats
 
@@ -185,8 +207,8 @@ class IdealQueryGeneration(SearchAndEval):
         gamma: float,
     ) -> QueryVector:
         query_terms = set(self._get_query_terms(query))
-        query_termstats_rel = self._get_termstats(query, from_relevant_docs=True)
-        query_termstats_non_rel = self._get_termstats(query, from_relevant_docs=False)
+        query_termstats_rel = self._get_termstats(query, True)
+        query_termstats_non_rel = self._get_termstats(query, False)
         rocchio_vector = QueryVector()
         for term, rel_stats in query_termstats_rel.items():
             if term in query_terms:
@@ -196,18 +218,22 @@ class IdealQueryGeneration(SearchAndEval):
                 query_terms.remove(term)
             else:
                 weight = 0.0
-            rel_avg_weight = sum(stat.weight for stat in rel_stats) / max(
-                1, len(query_termstats_rel)
-            )
+            rel_total_weight = sum(stat.weight for stat in rel_stats)
+            rel_avg_weight = rel_total_weight / max(1, len(query_termstats_rel))
             non_rel_stats = query_termstats_non_rel[term]
-            non_rel_avg_weight = sum(stat.weight for stat in non_rel_stats) / max(
+            non_rel_total_weight = sum(stat.weight for stat in non_rel_stats)
+            non_rel_avg_weight = non_rel_total_weight / max(
                 1, len(query_termstats_non_rel)
             )
             weight += beta * rel_avg_weight - gamma * non_rel_avg_weight
             if weight <= 0:  # don't add term to rocchio vector if weight <= 0
                 continue
             rocchio_vector[term] = SimpleNamespace(
-                weight=weight, rel_docs_freq=len(query_termstats_rel[term])
+                weight=weight,
+                rel_docs_freq=len(query_termstats_rel[term]),
+                doc_freq=self.reader.docFreq(Term(CONTENTS_FIELD, term)),
+                rel_total_weight=rel_total_weight,
+                non_rel_total_weight=non_rel_total_weight,
             )
         for term in query_terms:
             weight = alpha * self._compute_bm25_weight(term, 1, len(query_terms), True)
@@ -226,40 +252,61 @@ class IdealQueryGeneration(SearchAndEval):
 
     def tweak_query_vector(
         self,
-        query: TRECQuery,
+        qid: str,
         query_vector: QueryVector,
         tweak_magnitude_list: list[float] = [4.0, 2.0, 1.0, 0.5, 0.25],
+        runid=None,
     ) -> QueryVector:
-        current_map, _ = self.computeAP(query.qid, query_vector)
-        if current_map is None:  # if relevance not present in qrel, nothing to do
+        if runid:
+            os.makedirs(f"{ROOT_DIR}/logs/{runid}", exist_ok=True)
+            logging.basicConfig(
+                filename=f"{ROOT_DIR}/logs/{runid}/{qid}.log",
+                level=logging.DEBUG,
+                format="%(message)s",
+            )
+        current_map, _ = self.computeAP(qid, query_vector)
+        if current_map is None:  # if relevance not present in qrel file, nothing to do
             return query_vector
         for mag in tweak_magnitude_list:
             for term, stat in query_vector.vector.items():
                 current_weight = stat.weight
+                if current_weight == 0.0:
+                    logging.info(
+                        f"{qid}\t{mag}\t{term}\t{0.0}\t{0.0}\t{0.0}\t{current_map}\t{current_map}\t{0.0}"
+                    )
+                    tqdm.write(
+                        f"Term: {term:20s}Current Weight: {0.0:.3f}, Current AP: {current_map:.3f}, Tweak Magnitude: {mag}"
+                    )
+                    tqdm.write(
+                        f"Term: {term:20s}Nudged  Weight: {0.0:.3f}, Nudged  AP: {current_map:.3f} -- Keeping   Nudged Weight"
+                    )
+                    continue
+                nudged_weight = (1 + mag) * current_weight
+                query_vector[term].weight = nudged_weight
+                nudged_map, _ = self.computeAP(qid, query_vector)
                 tqdm.write(
                     f"Term: {term:20s}Current Weight: {current_weight:.3f}, Current AP: {current_map:.3f}, Tweak Magnitude: {mag}"
                 )
-                nudged_weight = (1 + mag) * current_weight
-                query_vector[term].weight = nudged_weight
-                nudged_map, _ = self.computeAP(query.qid, query_vector)
                 assert nudged_map is not None
+                if runid:
+                    logging.info(
+                        f"{qid}\t{mag}\t{term}\t{current_weight}\t{nudged_weight}\t{nudged_weight - current_weight}\t{current_map}\t{nudged_map}\t{nudged_map - current_map}"
+                    )
                 if nudged_map >= current_map:
                     tqdm.write(
                         f"Term: {term:20s}Nudged  Weight: {nudged_weight:.3f}, Nudged  AP: {nudged_map:.3f} -- Keeping   Nudged Weight"
                     )
                     current_map = nudged_map
-                    if current_map == 1.0:  # stop computing if MAP is already 1
-                        return query_vector
                 else:
+                    query_vector[term].weight = current_weight
                     tqdm.write(
                         f"Term: {term:20s}Nudged  Weight: {nudged_weight:.3f}, Nudged  AP: {nudged_map:.3f} -- Reverting Nudged Weight"
                     )
-                    query_vector[term].weight = current_weight
         return query_vector
 
     def generate(
         self,
-        extracted_queries_path: str,
+        parsed_queries_path: str,
         weights_store_path: str,
         run_store_path: str,
         alpha=2.0,
@@ -270,7 +317,7 @@ class IdealQueryGeneration(SearchAndEval):
         num_top_docs=1000,
         tweak_magnitude_list=[4.0, 2.0, 1.0, 0.5, 0.25],
     ):
-        query_reader = csv.reader(open(extracted_queries_path, "r"), delimiter="\t")
+        query_reader = csv.reader(open(parsed_queries_path, "r"), delimiter="\t")
         for row in query_reader:
             qid = row[0]
             query_text = row[1]
@@ -304,24 +351,26 @@ class IdealQueryGeneration(SearchAndEval):
 
             ## STEP 5: Start tweaking
             query_rocchio_vector = self.tweak_query_vector(
-                query,
+                query.qid,
                 query_rocchio_vector,
                 tweak_magnitude_list=tweak_magnitude_list,
+                runid=runid,
             )
 
             ## STEP 6: Compute final AP and final run
             final_ap, final_run = self.computeAP(
                 query.qid, query_rocchio_vector, num_top_docs
             )
-            print(f"Final MAP: {final_ap:.3f}")
 
             ## STEP 7: Store run of final tweaked query
-            store_run(
-                final_run,
-                run_output_path=run_store_path,
-                runid=runid,
-                append=True,
-            )
+            if final_ap:
+                print(f"Final MAP: {final_ap:.3f}")
+                store_run(
+                    final_run,
+                    run_output_path=run_store_path,
+                    runid=runid,
+                    append=True,
+                )
 
             ## STEP 8: Store expanded query
             query_rocchio_vector.store(query.qid, weights_store_path, append=True)
@@ -331,7 +380,8 @@ if __name__ == "__main__":
     index_path = TREC_INDEX_DIR_PATH
     stopwords_path = STOPWORDS_FILE_PATH
     actual_qrel_path = TREC_QREL_FILE_PATH
-    restrict_qrel_path = f"{ROOT_DIR}/qrels/bm25_intersect_trec678rb.qrel"
+    # restrict_qrel_path = f"{ROOT_DIR}/qrels/200bm25_intersect_trec678rb.qrel"
+    restrict_qrel_path = None  # use actual_qrel_path when None
 
     iqg = IdealQueryGeneration(
         index_path, stopwords_path, actual_qrel_path, restrict_qrel_path
@@ -343,7 +393,7 @@ if __name__ == "__main__":
     gamma = 64.0
 
     # trim rocchio vector to top NUM_EXPANSION_TERMS according to weights
-    num_expansion_terms = 200
+    num_expansion_terms = 1000
     # number of retrived documents for computing AP
     num_top_docs = 1000
 
@@ -362,19 +412,30 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    basename = os.path.basename(args.extracted_queries_path)
-
     # Weights will be stored in ideal-queries/trec678/weights/runid.term_weights file
-    # or ideal-queries/trec678/weights/runid-split/{query_file_basename}.term_weights files if split
-    weights_store_path = f"{ROOT_DIR}/ideal-queries/trec678/weights/{args.runid}{f"-split/{basename}" if args.split else ""}.term_weights"
-    # Runs will be stored in ideal-queries/trec678/runs/runid.run file
-    # or ideal-queries/trec678/runs/runid-split/{query_file_basename}.run files if split
-    run_store_path = f"{ROOT_DIR}/ideal-queries/trec678/runs/{args.runid}{f"-split/{basename}" if args.split else ""}.run"
+    # or ideal-queries/trec678/weights/{runid}-split/{qid}.term_weights files if split
+    # Runs will be stored in ideal-queries/trec678/runs/{runid}.run file
+    # or ideal-queries/trec678/runs/{runid}-split/{qid}.run files if split
+    if args.split:
+        qid = os.path.basename(args.extracted_queries_path)
+        weights_store_path = f"{ROOT_DIR}/ideal-queries/trec678/weights/{args.runid}-split/{qid}.term_weights"
+        run_store_path = (
+            f"{ROOT_DIR}/ideal-queries/trec678/runs/{args.runid}-split/{qid}.run"
+        )
+    else:
+        weights_store_path = (
+            f"{ROOT_DIR}/ideal-queries/trec678/weights/{args.runid}.term_weights"
+        )
+        run_store_path = f"{ROOT_DIR}/ideal-queries/trec678/runs/{args.runid}.run"
 
     # Don't compute if weights or run file already present
     if os.path.exists(weights_store_path) or os.path.exists(run_store_path):
         print("Run file or Term weight file already exists!")
-        exit(1)
+        inp = input("Overwrite both?[Y/n] ")
+        if inp.lower() == "y":
+            pass
+        else:
+            exit(1)
 
     iqg.generate(
         args.extracted_queries_path,

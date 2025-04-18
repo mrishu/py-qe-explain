@@ -1,8 +1,9 @@
 import os
 import csv
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from types import SimpleNamespace
 from typing import Union
+import pickle
 
 from definitions import CONTENTS_FIELD
 
@@ -28,7 +29,7 @@ class TRECQuery:
 class QueryVector:
     def __init__(self, vector: Union[dict[str, SimpleNamespace], None] = None) -> None:
         if not vector:
-            vector = dict()
+            vector = defaultdict(SimpleNamespace)
         self.vector = vector
         for stat in self.vector.values():
             assert hasattr(stat, "weight")
@@ -46,13 +47,21 @@ class QueryVector:
     def __len__(self):
         return len(self.vector)
 
-    def store(self, qid, store_path: str, append=True) -> None:
+    def store(self, qid, store_path: str, append=True, store_positive=True) -> None:
         os.makedirs(os.path.dirname(store_path), exist_ok=True)
         self.sort()  # always sort according to weight before storing
         with open(store_path, "a" if append else "w") as store_file:
             writer = csv.writer(store_file, delimiter="\t")
             for term, stat in self.vector.items():
-                writer.writerow([qid, term, stat.weight])
+                if store_positive:
+                    if stat.weight > 0:
+                        writer.writerow([qid, term, stat.weight])
+                else:
+                    writer.writerow([qid, term, stat.weight])
+
+    def store_raw(self, store_path: str):
+        with open(store_path, "wb") as pickle_file:
+            pickle.dump(self, pickle_file)
 
     def to_boolquery(self) -> BooleanQuery:
         bool_query_builder = BooleanQuery.Builder()
@@ -74,11 +83,38 @@ class QueryVector:
     def trim(self, num_keep_terms: int = 200) -> None:
         self.vector = dict(list(self.vector.items())[:num_keep_terms])
 
-    def display(self, max_terms=200) -> None:
-        print("Query Vector:")
+    def __repr__(self):
+        final_str = "Query Vector:\n"
         x = 0
         for term, stat in self.vector.items():
-            print(f"{term:20s}{stat.weight:.3f}")
+            final_str += f"{term:20s}{stat.weight:.3f}\n"
             x += 1
-            if x >= max_terms:
+            if x >= 200:
                 break
+        return final_str
+
+    def __add__(self, other: "QueryVector") -> "QueryVector":
+        added_vector = defaultdict(SimpleNamespace)
+        for term, stat in self.vector.items():
+            added_vector[term].weight = stat.weight
+        for term, stat in other.vector.items():
+            if term in added_vector:
+                added_vector[term].weight += stat.weight
+            else:
+                added_vector[term].weight = stat.weight
+        return QueryVector(added_vector)
+
+    def __matmul__(self, other: "QueryVector") -> float:
+        dot_product = 0
+        intersection_terms = self.vector.keys() & other.vector.keys()
+        for term in intersection_terms:
+            dot_product += self[term].weight * other[term].weight
+        return dot_product
+
+    def __truediv__(self, other: Union[float, int]) -> "QueryVector":
+        if other == 0.0:
+            raise ZeroDivisionError
+        div_vector = defaultdict(SimpleNamespace)
+        for term in self.vector.keys():
+            div_vector[term].weight = self.vector[term].weight / other
+        return QueryVector(div_vector)
