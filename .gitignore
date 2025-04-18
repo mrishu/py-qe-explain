@@ -10,3 +10,4 @@ expanded-queries/
 test-runs/
 similarity-correlation/output*
 **/*.tar.gz
+**/*.pkl

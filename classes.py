@@ -60,6 +60,7 @@ class QueryVector:
                     writer.writerow([qid, term, stat.weight])
 
     def store_raw(self, store_path: str):
+        os.makedirs(os.path.dirname(store_path), exist_ok=True)
         with open(store_path, "wb") as pickle_file:
             pickle.dump(self, pickle_file)
 

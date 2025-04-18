@@ -233,7 +233,9 @@ class IdealQueryGeneration(SearchAndEval):
                 rel_docs_freq=len(query_termstats_rel[term]),
                 doc_freq=self.reader.docFreq(Term(CONTENTS_FIELD, term)),
                 rel_total_weight=rel_total_weight,
+                rel_avg_weight=rel_avg_weight,
                 non_rel_total_weight=non_rel_total_weight,
+                non_rel_avg_weight=non_rel_avg_weight,
             )
         for term in query_terms:
             weight = alpha * self._compute_bm25_weight(term, 1, len(query_terms), True)
@@ -308,6 +310,7 @@ class IdealQueryGeneration(SearchAndEval):
         self,
         parsed_queries_path: str,
         weights_store_path: str,
+        raw_store_dir: str,
         run_store_path: str,
         alpha=2.0,
         beta=64.0,
@@ -372,8 +375,13 @@ class IdealQueryGeneration(SearchAndEval):
                     append=True,
                 )
 
-            ## STEP 8: Store expanded query
+            ## STEP 8: Store twearked query weights
             query_rocchio_vector.store(query.qid, weights_store_path, append=True)
+
+            ## STEP 9: Store tweaked query raw
+            query_rocchio_vector.store_raw(
+                os.path.join(raw_store_dir, runid, f"{qid}.pkl")
+            )
 
 
 if __name__ == "__main__":
@@ -393,12 +401,12 @@ if __name__ == "__main__":
     gamma = 64.0
 
     # trim rocchio vector to top NUM_EXPANSION_TERMS according to weights
-    num_expansion_terms = 1000
+    num_expansion_terms = 200
     # number of retrived documents for computing AP
     num_top_docs = 1000
 
     # Tweak magnitude list
-    tweak_magnitude_list = [4.0, 2.0, 1.0, 0.5, 0.25]
+    tweak_magnitude_list = [4.0, 2.0, 1.0, 0.5, 0.25, -1]
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -428,18 +436,17 @@ if __name__ == "__main__":
         )
         run_store_path = f"{ROOT_DIR}/ideal-queries/trec678/runs/{args.runid}.run"
 
+    raw_store_dir = f"{ROOT_DIR}/ideal_queries_raw/trec678/"
+
     # Don't compute if weights or run file already present
     if os.path.exists(weights_store_path) or os.path.exists(run_store_path):
         print("Run file or Term weight file already exists!")
-        inp = input("Overwrite both?[Y/n] ")
-        if inp.lower() == "y":
-            pass
-        else:
-            exit(1)
+        exit(1)
 
     iqg.generate(
         args.extracted_queries_path,
         weights_store_path,
+        raw_store_dir,
         run_store_path,
         alpha,
         beta,
