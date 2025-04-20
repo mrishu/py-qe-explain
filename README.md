@@ -101,8 +101,6 @@ This produces a restricted `qrel` file: `qrels/bm25_intersect_trec678rb.qrel`.
 
 ## Ideal Queries
 
-[Download Ideal Queries](https://drive.google.com/file/d/1f2nzHYwQEDosw5UQQ4MtA-fm1mihNFLS/view?usp=sharing)
-
 ### Extracting the Ideal Queries
 
 ```bash
@@ -159,7 +157,7 @@ can be changed to point to appropriate ideal query files.
 
 ## Expanded Queries
 
-[Download Expanded Queries](https://drive.google.com/file/d/1OcH57z-IqLs2bVgw5rKXiD5XkzhrgmFy/view?usp=sharing)
+[Download Expanded Queries](https://drive.google.com/file/d/1--By6ottQYm9qmV6yP7RQd4ik9Jv60RK/view?usp=drive_link)
 
 ### Extracting the Expanded Queries
 
@@ -201,30 +199,30 @@ where `<similarity_measure>` can be one of:
 
 | Correlation | Vanilla Ideal Query | Restricted Ideal Query |
 | ----------- | ------------------- | ---------------------- |
-| Pearson     | 0.27530978584589544 | 0.26719890865599216    |
-| Kendall     | 0.2039317057781643  | 0.19527271741380392    |
-| Spearman    | 0.2804058431142231  | 0.2676524936238417     |
+| Pearson     | 0.32850289256426674 | 0.27759558828116154    |
+| Kendall     | 0.2526529360617039  | 0.22540525530980843    |
+| Spearman    | 0.33340652354355166 | 0.2938914619937353     |
 
 ## `l1` similarity
 
-| Correlation | Vanilla Ideal Query   | Restricted Ideal Query |
-| ----------- | --------------------- | ---------------------- |
-| Pearson     | -0.021846086059143458 | -0.013452476593593514  |
-| Kendall     | -0.07218926465331622  | -0.06674220854442578   |
-| Spearman    | -0.10172536810824717  | -0.09632707167480746   |
+| Correlation | Vanilla Ideal Query  | Restricted Ideal Query |
+| ----------- | -------------------- | ---------------------- |
+| Pearson     | -0.21007223132213704 | -0.20728311608399294   |
+| Kendall     | -0.16435169335619965 | -0.1601046472361515    |
+| Spearman    | -0.20797697840523988 | -0.20506635517473298   |
 
 ## `l2` similarity
 
 | Correlation | Vanilla Ideal Query | Restricted Ideal Query |
 | ----------- | ------------------- | ---------------------- |
-| Pearson     | 0.3035792866335904  | 0.2983063348444898     |
-| Kendall     | 0.29638548155480743 | 0.2845539556187513     |
-| Spearman    | 0.39024597207486517 | 0.37373457259699033    |
+| Pearson     | 0.48588925313369746 | 0.42462301968902255    |
+| Kendall     | 0.3762342288372392  | 0.33027383292111384    |
+| Spearman    | 0.47650906178783736 | 0.4182856179869354     |
 
 ## `ndcg_modified_2` similarity
 
 | Correlation | Vanilla Ideal Query  | Restricted Ideal Query |
 | ----------- | -------------------- | ---------------------- |
-| Pearson     | 0.023741949357671686 | 0.03337957897785733    |
-| Kendall     | 0.05391125458798632  | 0.050904183098999765   |
-| Spearman    | 0.07306139152559063  | 0.06812348885506235    |
+| Pearson     | 0.06415343859352021  | 0.04582163064420157    |
+| Kendall     | 0.046892955913689124 | 0.03735461453626145    |
+| Spearman    | 0.07066278962536988  | 0.055134640052953016   |
