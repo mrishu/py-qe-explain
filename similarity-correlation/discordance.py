@@ -45,7 +45,7 @@ def print_discordance(
     exp_method = r[0]
     num_terms = int(r[1])
     exp_query_file = (
-        "/".join([myglobals.expanded_query_path, exp_method, myglobals.coll, runid])
+        "/".join([myglobals.expanded_query_path, exp_method, "weights", runid])
         + ".term_weights"
     )
 

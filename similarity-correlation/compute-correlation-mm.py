@@ -14,6 +14,11 @@ from similarities_mm import *
 
 similarity_function_name = ""
 
+
+def func(x):
+    return 1 / (x**2 + 1)
+
+
 # -- main -------------------------------------------------------------------#
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -111,12 +116,18 @@ if __name__ == "__main__":
                 if math.isnan(pearson_corr) != True:
                     sum_of_corr_pear += pearson_corr
                     non_nan_count_pearson += 1
+                else:
+                    print("Pearson NaN", qid)
                 if math.isnan(kendall_corr) != True:
                     sum_of_corr_kend += kendall_corr
                     non_nan_count_kendall += 1
+                else:
+                    print("Kendall NaN", qid)
                 if math.isnan(spearman_corr) != True:
                     sum_of_corr_spear += spearman_corr
                     non_nan_count_spearman += 1
+                else:
+                    print("Spearman NaN", qid)
 
         with open(
             outputdir + "-".join(["summary", similarity_function_name, coll]), "w"

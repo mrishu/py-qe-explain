@@ -21,7 +21,7 @@ num_rel = dict()
 with open("./num_rel_docs") as f:
     reader = csv.reader(f, delimiter="\t")
     for row in reader:
-        num_rel[row[0]] = int(row[1])
+        num_rel[int(row[0])] = int(row[1])
 
 
 def jaccard(qid, ideal_query, expanded_query, logfile):
@@ -42,7 +42,7 @@ def jaccard(qid, ideal_query, expanded_query, logfile):
     union = I + J - (l := len(intersection))
     print(f"union = {union} intersection = {l} " f"similarity {(sim := l/union)}")
 
-    return sim / num_rel[qid]
+    return sim
 
 
 def cap(qid, ideal_query, expanded_query, logfile):
