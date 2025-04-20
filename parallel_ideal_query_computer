@@ -6,4 +6,4 @@ else
     num_jobs="$1" # Use the first argument
 fi
 
-parallel --line-buffer --tag -j$num_jobs 'python3 iqg.py {} --split --runid ideal_query_short' ::: extracted-queries/trec678-split/*
+parallel --line-buffer --tag -j$num_jobs 'python3 iqg.py {} --split --runid untweaked_rocchio_zerogamma' ::: extracted-queries/trec678-split/*

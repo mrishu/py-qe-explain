@@ -1,5 +1,8 @@
 import numpy as np
 from numpy.linalg import norm
+import pickle
+from utils import parse_queries, parse_ap
+from itertools import product
 
 from classes import QueryVector
 
@@ -13,8 +16,8 @@ class Similarities:
         self.expanded_query.sort_by_terms()
         self.ideal_query_terms = self.ideal_query.vector.keys()
         self.expanded_query_terms = self.expanded_query.vector.keys()
-        self.intersection = self.ideal_query_terms & self.expanded_query_terms
         self.union = self.ideal_query_terms | self.expanded_query_terms
+        self.intersection = self.ideal_query_terms & self.expanded_query_terms
         self.dot_product = sum(
             self.ideal_query[term].weight * self.expanded_query[term].weight
             for term in self.intersection
@@ -66,3 +69,9 @@ class Similarities:
             ideal_sim += (stat.weight * 1000) / (1000 + (i + 1))
 
         return sim / ideal_sim
+
+
+ideal_query_runid = "ideal_query"
+ideal_query_dir = f"ideal_queries_raw/trec678/{ideal_query_runid}/"
+
+ideal_query_ap = parse_ap(f"./ideal-queries/trec678/aps/{ideal_query_runid}.ap")

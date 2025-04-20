@@ -27,7 +27,9 @@ searcher = SearchAndEval(TREC_INDEX_DIR_PATH, STOPWORDS_FILE_PATH, TREC_QREL_FIL
 print("Index initialized")
 
 query_vectors = parse_queries(args.weight_file)
-num_terms = int(args.weight_file.split("-")[1])  # for trimming of longer query_vectors
+num_terms = int(
+    os.path.basename(args.weight_file).split("-")[1]
+)  # for trimming of longer query_vectors
 
 for qid, query_vector in query_vectors.items():
     print(f"Running Query {qid}")

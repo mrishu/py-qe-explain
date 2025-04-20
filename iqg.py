@@ -388,7 +388,7 @@ if __name__ == "__main__":
     index_path = TREC_INDEX_DIR_PATH
     stopwords_path = STOPWORDS_FILE_PATH
     actual_qrel_path = TREC_QREL_FILE_PATH
-    # restrict_qrel_path = f"{ROOT_DIR}/qrels/200bm25_intersect_trec678rb.qrel"
+    # restrict_qrel_path = f"{ROOT_DIR}/qrels/bm25_intersect_trec678rb.qrel"
     restrict_qrel_path = None  # use actual_qrel_path when None
 
     iqg = IdealQueryGeneration(
@@ -406,7 +406,7 @@ if __name__ == "__main__":
     num_top_docs = 1000
 
     # Tweak magnitude list
-    tweak_magnitude_list = [4.0, 2.0, 1.0, 0.5, 0.25, -1]
+    tweak_magnitude_list = [4.0, 2.0, 1.0, 0.5, 0.25]
 
     parser = argparse.ArgumentParser()
     parser.add_argument(

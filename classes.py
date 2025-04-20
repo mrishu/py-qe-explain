@@ -88,9 +88,9 @@ class QueryVector:
         final_str = "Query Vector:\n"
         x = 0
         for term, stat in self.vector.items():
-            final_str += f"{term:20s}{stat.weight:.3f}\n"
+            final_str += f"{term:20s}{stat.weight:20.3f}\t{stat.rel_docs_freq:20d}\t{stat.doc_freq:20d}\t{stat.rel_total_weight:20.3f}\n"
             x += 1
-            if x >= 200:
+            if x >= 200:  # display only upto 200 terms
                 break
         return final_str
 
@@ -119,3 +119,11 @@ class QueryVector:
         for term in self.vector.keys():
             div_vector[term].weight = self.vector[term].weight / other
         return QueryVector(div_vector)
+
+    def remove_zero_weights(self):
+        new_vector = OrderedDict()
+        for term, stat in self.vector.items():
+            if stat.weight == 0:
+                continue
+            new_vector[term] = stat
+        self.vector = new_vector

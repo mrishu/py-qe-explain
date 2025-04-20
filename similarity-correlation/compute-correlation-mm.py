@@ -26,7 +26,7 @@ if __name__ == "__main__":
         )
     similarity_function = similarity_measures[sys.argv[1]]
 
-    outputdir = "output" + time.strftime("-%m-%d-%H-%M/")
+    outputdir = "output" + time.strftime("-%S-%m-%d-%H-%M/")
     try:
         os.mkdir(outputdir)
     except FileExistsError:

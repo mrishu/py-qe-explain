@@ -19,14 +19,17 @@ class Pair:
 
 # ---------------------------------------------------------------------------#
 # File names containing ideal / expanded query term-weights
+
+ideal_q_runid = "ideal_query_restrict"
+
 term_weight_file = dict()
 term_weight_file["ideal"] = (
-    ROOT_DIR + "/ideal-queries/trec678/weights/ideal_query_restrict.term_weights"
+    ROOT_DIR + f"/ideal-queries/trec678/weights/{ideal_q_runid}.term_weights"
 )
 
 # Files containing AP achieved by ideal / expanded query
 ap_file = dict()
-ap_file["ideal"] = ROOT_DIR + "/ideal-queries/trec678/aps/ideal_query_restrict.ap"
+ap_file["ideal"] = ROOT_DIR + f"/ideal-queries/trec678/aps/{ideal_q_runid}.ap"
 
 # Aliases
 ideal_query_path = term_weight_file["ideal"]
@@ -41,6 +44,7 @@ expanded_query_path = ROOT_DIR + "/expanded-queries/trec678/"
 # colls = [ "trec678", "clueweb09b" ]
 colls = ["trec678"]
 expansion_methods = ["rm3", "ceqe", "loglogistic", "spl"]
+# expansion_methods = ["spl"]
 num_top_docs = [10, 20, 30, 40]  # [10, 20, 30, 40, 50, 60]
 num_exp_terms = [15, 25, 35, 45, 55]  # [15, 25, 35, 45, 55, 65, 75]
 
