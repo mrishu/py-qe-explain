@@ -72,6 +72,6 @@ class Similarities:
 
 
 ideal_query_runid = "ideal_query"
-ideal_query_dir = f"ideal_queries_raw/trec678/{ideal_query_runid}/"
+ideal_query_dir = f"ideal-queries-raw/trec678/{ideal_query_runid}/"
 
 ideal_query_ap = parse_ap(f"./ideal-queries/trec678/aps/{ideal_query_runid}.ap")

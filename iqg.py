@@ -436,7 +436,7 @@ if __name__ == "__main__":
         )
         run_store_path = f"{ROOT_DIR}/ideal-queries/trec678/runs/{args.runid}.run"
 
-    raw_store_dir = f"{ROOT_DIR}/ideal_queries_raw/trec678/"
+    raw_store_dir = f"{ROOT_DIR}/ideal-queries-raw/trec678/"
 
     # Don't compute if weights or run file already present
     if os.path.exists(weights_store_path) or os.path.exists(run_store_path):
