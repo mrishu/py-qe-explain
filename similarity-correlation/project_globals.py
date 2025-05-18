@@ -20,7 +20,7 @@ class Pair:
 # ---------------------------------------------------------------------------#
 # File names containing ideal / expanded query term-weights
 
-ideal_q_runid = "ideal_query"
+ideal_q_runid = "neg_ideal_query"
 
 term_weight_file = dict()
 term_weight_file["ideal"] = (

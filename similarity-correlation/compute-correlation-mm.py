@@ -7,6 +7,7 @@ from itertools import product
 from scipy.stats import pearsonr
 from scipy.stats import kendalltau
 from scipy.stats import spearmanr
+import matplotlib.pyplot as plt
 
 from fileio import *
 from project_globals import *
@@ -99,6 +100,11 @@ if __name__ == "__main__":
             non_nan_count_kendall = 0
             non_nan_count_spearman = 0
 
+            pearson_corr_list = []
+            kendall_corr_list = []
+            spearman_corr_list = []
+            num_rel_list = []
+
             for qid in qid_similarity_list_dict.keys():
                 similarity_list = qid_similarity_list_dict[qid]
                 ap_list = qid_ap_list_dict[qid]
@@ -116,18 +122,24 @@ if __name__ == "__main__":
                 if math.isnan(pearson_corr) != True:
                     sum_of_corr_pear += pearson_corr
                     non_nan_count_pearson += 1
+                    pearson_corr_list.append(pearson_corr)
+                    num_rel_list.append(num_rel[int(qid)])
                 else:
                     print("Pearson NaN", qid)
                 if math.isnan(kendall_corr) != True:
                     sum_of_corr_kend += kendall_corr
                     non_nan_count_kendall += 1
+                    kendall_corr_list.append(kendall_corr)
                 else:
                     print("Kendall NaN", qid)
                 if math.isnan(spearman_corr) != True:
                     sum_of_corr_spear += spearman_corr
                     non_nan_count_spearman += 1
+                    spearman_corr_list.append(spearman_corr)
                 else:
                     print("Spearman NaN", qid)
+
+            plt.scatter(num_rel_list, pearson_corr_list)
 
         with open(
             outputdir + "-".join(["summary", similarity_function_name, coll]), "w"
@@ -157,3 +169,5 @@ if __name__ == "__main__":
                 non_nan_count_spearman,
                 file=f,
             )
+
+plt.show()
