@@ -1,14 +1,17 @@
 #!/bin/sh
 
+# This file generates the run and ap files using run_ap_generator for all the expanded queries
+# Do this if not all already generated
+
 if [ $# -eq 0 ]; then
-  num_jobs=12 # Set a default value
+    num_jobs=12 # Set a default value
 else
-  num_jobs="$1" # Use the first argument
+    num_jobs="$1" # Use the first argument
 fi
 
 expanded_queries_dir=expanded-queries/trec678
 
 parallel --line-buffer --tag -j$num_jobs 'python3 run_ap_generator.py {}' ::: $expanded_queries_dir/rm3/weights/* \
-  $expanded_queries_dir/spl/weights/* \
-  $expanded_queries_dir/ceqe/weights/* \
-  $expanded_queries_dir/loglogistic/weights/*
+    $expanded_queries_dir/spl/weights/* \
+    $expanded_queries_dir/ceqe/weights/* \
+    $expanded_queries_dir/loglogistic/weights/*

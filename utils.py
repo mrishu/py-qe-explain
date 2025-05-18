@@ -6,15 +6,11 @@ from types import SimpleNamespace
 from classes import QueryVector
 
 
-def create_file_dir(file_path: str) -> None:
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)
-
-
 # Input:
 # qrel: Dictionary containing the mapping dict("qid" -> dict(("docid" -> relevance))
 # qrel_output_path: Path to save the qrel file
 def store_qrel(qrel: dict[str, dict[str, int]], qrel_output_path: str, append=False):
-    create_file_dir(qrel_output_path)
+    os.makedirs(os.path.dirname(qrel_output_path), exist_ok=True)
     with open(qrel_output_path, "w" if append else "w") as f:
         writer = csv.writer(f, delimiter="\t")
         for qid, relevances in qrel.items():
@@ -29,7 +25,7 @@ def store_qrel(qrel: dict[str, dict[str, int]], qrel_output_path: str, append=Fa
 def store_run(
     run: dict[str, dict[str, float]], run_output_path: str, runid: str, append=False
 ):
-    create_file_dir(run_output_path)
+    os.makedirs(os.path.dirname(run_output_path), exist_ok=True)
     with open(run_output_path, "a" if append else "w") as f:
         writer = csv.writer(f, delimiter="\t")
         for qid, scores in run.items():
@@ -43,7 +39,7 @@ def store_run(
 # aps: Dictionary containing the mapping dict("qid" -> AP)
 # ap_file_path: Path to the AP file
 def store_ap(aps: dict[str, float], ap_file_path: str, append=False):
-    create_file_dir(ap_file_path)
+    os.makedirs(os.path.dirname(ap_file_path), exist_ok=True)
     with open(ap_file_path, "a" if append else "w") as f:
         writer = csv.writer(f, delimiter="\t")
         for qid, ap in aps.items():
@@ -57,8 +53,8 @@ def store_ap(aps: dict[str, float], ap_file_path: str, append=False):
 def parse_queries(weight_file_path: str) -> dict[str, QueryVector]:
     with open(weight_file_path, "r") as f:
         query_vectors = defaultdict(QueryVector)
-        reader = csv.reader(f, delimiter="\t")
-        for row in reader:
+        for line in f:
+            row = line.strip().split()
             qid = row[0]
             term = row[1]
             weight = float(row[2])
@@ -75,8 +71,8 @@ def parse_queries(weight_file_path: str) -> dict[str, QueryVector]:
 def parse_ap(ap_file_path: str) -> dict[str, float]:
     aps = dict()
     with open(ap_file_path, "r") as f:
-        reader = csv.reader(f, delimiter="\t")
-        for row in reader:
+        for line in f:
+            row = line.strip().split()
             qid = row[1]
             ap = float(row[2])
             aps[qid] = ap

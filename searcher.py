@@ -2,6 +2,7 @@
 import re
 import csv
 from collections import OrderedDict
+import os
 
 ## Extra imports
 import pytrec_eval
@@ -73,7 +74,7 @@ class SearchAndEval:
             results[docid] = score
         return results
 
-    def computeAP(self, qid: str, query_vector: QueryVector, num_top_docs=1000):
+    def computeAP_and_run(self, qid: str, query_vector: QueryVector, num_top_docs=1000):
         run = dict()
         results = self.search(query_vector.to_boolquery(), num_top_docs)
         run[qid] = results
@@ -99,11 +100,12 @@ class SearchAndEval:
 
 
 if __name__ == "__main__":
+    # the below script generates a run file for a BM25 top 1000 retrieval
     searcher = SearchAndEval(
         TREC_INDEX_DIR_PATH, STOPWORDS_FILE_PATH, TREC_QREL_FILE_PATH
     )
-    extracted_queries_path = f"{ROOT_DIR}/extracted-queries/trec678"
-    run_output_path = f"{ROOT_DIR}/test-runs/bm25.run"
+    extracted_queries_path = os.path.join(ROOT_DIR, "extracted-queries", "trec678")
+    run_output_path = os.path.join(ROOT_DIR, "test-runs", "bm25.run")
 
     reader = csv.reader(open(extracted_queries_path, "r"), delimiter="\t")
     run = dict()

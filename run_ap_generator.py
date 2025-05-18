@@ -9,8 +9,8 @@ from definitions import TREC_INDEX_DIR_PATH, STOPWORDS_FILE_PATH, TREC_QREL_FILE
 
 
 """
-Expected input: term_weights file stored in 'weights' folder
-Expected output: run file, ap file in corresponding 'runs' and 'aps' folder beside the 'weights' folder
+Expected input: term_weights file
+Expected output: run file, ap file in corresponding 'runs' and 'aps' dir beside parent dir of term_weights file
 """
 
 parser = argparse.ArgumentParser()
@@ -29,12 +29,12 @@ print("Index initialized")
 query_vectors = parse_queries(args.weight_file)
 num_terms = int(
     os.path.basename(args.weight_file).split("-")[1]
-)  # for trimming of longer query_vectors
+)  # for trimming as per given number of terms
 
 for qid, query_vector in query_vectors.items():
     print(f"Running Query {qid}")
     query_vector.trim(num_terms)  # trim upto top num_terms terms
-    ap, run = searcher.computeAP(qid, query_vector)
+    ap, run = searcher.computeAP_and_run(qid, query_vector)
     ap_dict = dict()
     ap_dict[qid] = ap
     if ap:
