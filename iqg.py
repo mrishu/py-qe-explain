@@ -453,7 +453,7 @@ if __name__ == "__main__":
         )
         run_store_path = os.path.join(ideal_query_base_dir, "runs", f"{args.runid}.run")
 
-    ideal_query_pickle_dir = os.path.join(ROOT_DIR, "ideal-queries-pickle" "trec678")
+    ideal_query_pickle_dir = os.path.join(ROOT_DIR, "ideal-queries-pickle", "trec678")
 
     # Don't compute if weights or run file already present
     if os.path.exists(weights_store_path) or os.path.exists(run_store_path):
