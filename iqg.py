@@ -326,8 +326,10 @@ class IdealQueryGeneration(SearchAndEval):
         num_top_docs=1000,
         tweak_magnitude_list=[4.0, 2.0, 1.0, 0.5, 0.25],
     ):
-        query_reader = csv.reader(open(extracted_queries_path, "r"), delimiter="\t")
-        for row in query_reader:
+        extracted_query_reader = csv.reader(
+            open(extracted_queries_path, "r"), delimiter="\t"
+        )
+        for row in extracted_query_reader:
             qid = row[0]
             query_text = row[1]
 
@@ -344,7 +346,7 @@ class IdealQueryGeneration(SearchAndEval):
             # Sort it according to decreasing order of frequency in relevant documents
             query_rocchio_vector.sort_by_stat(lambda stat: stat.rel_docs_freq)
             num_valid_terms = 0
-            min_threshold = 0.02 * len(self.query_rel_docs_map[query.qid])
+            min_threshold = 0.02 * len(self.query_rel_docs_map[qid])
             for _, stat in query_rocchio_vector.vector.items():
                 if stat.rel_docs_freq < min_threshold:
                     break
@@ -360,7 +362,7 @@ class IdealQueryGeneration(SearchAndEval):
 
             ## STEP 5: Start tweaking
             query_rocchio_vector = self.tweak_query_vector(
-                query.qid,
+                qid,
                 query_rocchio_vector,
                 tweak_magnitude_list=tweak_magnitude_list,
                 runid=runid,
@@ -368,7 +370,7 @@ class IdealQueryGeneration(SearchAndEval):
 
             ## STEP 6: Compute final AP and final run
             final_ap, final_run = self.computeAP_and_run(
-                query.qid, query_rocchio_vector, num_top_docs
+                qid, query_rocchio_vector, num_top_docs
             )
 
             ## STEP 7: Store run of final tweaked query
@@ -382,7 +384,7 @@ class IdealQueryGeneration(SearchAndEval):
                 )
 
             ## STEP 8: Store tweaked query weights
-            query_rocchio_vector.store_txt(query.qid, weights_store_path, append=True)
+            query_rocchio_vector.store_txt(qid, weights_store_path, append=True)
 
             ## STEP 9: Store tweaked query pickle
             query_rocchio_vector.store_pickle(

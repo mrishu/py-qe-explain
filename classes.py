@@ -53,17 +53,17 @@ class QueryVector:
     def store_txt(self, qid, store_path: str, append=True, store_positive=True) -> None:
         os.makedirs(os.path.dirname(store_path), exist_ok=True)
         self.sort_by_stat()  # always sort according to weight before storing
+        if store_positive:
+            self.remove_non_positive_weights()
         with open(store_path, "a" if append else "w") as store_file:
             writer = csv.writer(store_file, delimiter="\t")
             for term, stat in self.vector.items():
-                if store_positive:
-                    if stat.weight > 0:
-                        writer.writerow([qid, term, stat.weight])
-                else:
-                    writer.writerow([qid, term, stat.weight])
+                writer.writerow([qid, term, stat.weight])
 
-    def store_pickle(self, store_path: str) -> None:
+    def store_pickle(self, store_path: str, store_positive=True) -> None:
         os.makedirs(os.path.dirname(store_path), exist_ok=True)
+        if store_positive:
+            self.remove_non_positive_weights()
         with open(store_path, "wb") as pickle_file:
             pickle.dump(self, pickle_file)
 
