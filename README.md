@@ -68,7 +68,7 @@ P_1000                 all 0.0651
 
 ---
 
-# Steps to Reproduce for Restricted Ground Truth
+## Steps to Reproduce for Restricted Ground Truth
 
 These steps describe how to generate a restricted ground truth using only the relevance of documents that appear in the top 1000 retrieved documents.
 
@@ -110,8 +110,6 @@ This produces a restricted `qrel` file: `qrels/bm25_intersect_trec678rb.qrel`.
 
 ---
 
-## Ideal Queries
-
 ### Generating Ideal Queries
 
 - For generating ideal query on restricted ground truth, in the `__main__` section of `iqg.py`, make
@@ -141,16 +139,16 @@ _(Default: 12 parallel jobs)_
 Merge the split files into a single `run` and `term_weights` file:
 
 ```bash
-cat ideal-queries/trec678/runs/ideal_query_restrict-split/* > ideal-queries/trec678/runs/ideal_query_restrict.run
+cat ideal-queries/trec678/weights/ideal_query_restrict-split/* > ideal-queries/trec678/weights/ideal_query_restrict.term_weights
 ```
 
 ```bash
-cat ideal-queries/trec678/weights/ideal_query_restrict-split/* > ideal-queries/trec678/weights/ideal_query_restrict.term_weights
+cat ideal-queries/trec678/runs/ideal_query_restrict-split/* > ideal-queries/trec678/runs/ideal_query_restrict.run
 ```
 
 ---
 
-Generate the `ap` file:
+Irrespective of whether parallelization was used or not, generate the `ap` file using:
 
 ```bash
 mkdir -p ideal-queries/trec678/aps/
@@ -159,11 +157,26 @@ trec_eval -m map -q qrels/trec678rb.qrel ideal-queries/trec678/runs/ideal_query_
 
 ---
 
-## Expanded Queries
+### Generating Logistic Regression Ideal Queries
 
+1. Change `ideal_q_runid` and other parameters in the file `iqg2.py`.
+2. Run:
+
+   ```bash
+   python3 iqg2.py
+
+   ```
+
+`iqg2.py` generates the `term_weights` , `run` and `ap` files together. So no need to do anything else.
+
+---
+
+### Expanded Queries
+
+Below link contains expanded queries with calculated corresponding `run` and `ap` files:  
 [Download Expanded Queries](https://drive.google.com/file/d/1--By6ottQYm9qmV6yP7RQd4ik9Jv60RK/view?usp=drive_link)
 
-### Generating `run` and `ap` Files
+#### Generating `run` and `ap` Files
 
 Expanded query weights were taken provided by Sourav Da ([expanded-queries-weights-only](https://drive.google.com/file/d/1PutRi-rUFQ0a4QfJ157lfHK1VXOmf3hk/view?usp=sharing)) and `run` and `ap` files were generated using `run_ap_generator.py`.
 
@@ -177,7 +190,7 @@ _(Default: 12 parallel jobs)_
 
 ---
 
-## Computing Similarity and Correlation
+### Computing Similarity and Correlation
 
 Change the `ideal_q_runid` in `compute-correlation.py` to the runid of the ideal query which is to be considered.
 
@@ -220,12 +233,3 @@ python3 compute-correlation.py
 | Pearson     | 0.06415343859352021  | 0.04582163064420157    |
 | Kendall     | 0.046892955913689124 | 0.03735461453626145    |
 | Spearman    | 0.07066278962536988  | 0.055134640052953016   |
-
-## Generating Logistic Regression Ideal Queries
-
-1. Change `ideal_q_runid` and other parameters in the file `iqg2.py`.
-2. Run:
-
-   ```bash
-   python3 iqg2.py
-   ```
