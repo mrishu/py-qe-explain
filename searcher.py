@@ -1,8 +1,9 @@
 ## Library imports
 import re
 import csv
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 import os
+from copy import deepcopy
 
 ## Extra imports
 import pytrec_eval
@@ -17,7 +18,7 @@ from definitions import (
     TREC_QREL_FILE_PATH,
 )
 from classes import QueryVector
-from utils import store_run
+from utils import store_run, store_ap, store_mean_ap
 
 ## Lucene imports
 from java.io import File
@@ -42,7 +43,7 @@ class SearchAndEval:
         self.searcher = IndexSearcher(self.reader)
         self.searcher.setSimilarity(BM25Similarity())
         self.searcher.setMaxClauseCount(
-            4096
+            8192
         )  # since the expanded queries can get very long
         with open(stopwords_path, "r") as stopwords_file:
             stopwords = stopwords_file.read().strip().split()
@@ -75,14 +76,13 @@ class SearchAndEval:
         return results
 
     def computeAP_and_run(self, qid: str, query_vector: QueryVector, num_top_docs=1000):
+        qvec = deepcopy(query_vector)
+        qvec.remove_non_positive_weights()
+        results = self.search(qvec.to_boolquery(), num_top_docs)
         run = dict()
-        results = self.search(query_vector.to_boolquery(), num_top_docs)
         run[qid] = results
-        eval = self.qrel_evaluator.evaluate(run)
-        if qid not in eval:
-            return None, run
-        else:
-            return eval[qid]["map"], run
+        ap = self.get_APs_from_run(run)[qid]
+        return ap, run
 
     def get_lucene_docid(self, docid: str) -> int:
         if docid in self.lucene_docid_cache:
@@ -95,6 +95,16 @@ class SearchAndEval:
         self.lucene_docid_cache[docid] = lucene_docid
         return lucene_docid
 
+    def get_APs_from_run(self, run):
+        aps = defaultdict(None)
+        eval = self.qrel_evaluator.evaluate(run)
+        for qid in run.keys():
+            if qid not in eval:
+                aps[qid] = None
+            else:
+                aps[qid] = eval[qid]["map"]
+        return aps
+
     def close(self):
         self.reader.close()
 
@@ -106,6 +116,12 @@ if __name__ == "__main__":
     )
     extracted_queries_path = os.path.join(ROOT_DIR, "extracted-queries", "trec678")
     run_output_path = os.path.join(ROOT_DIR, "test-runs", "bm25.run")
+    ap_output_path = os.path.join(ROOT_DIR, "test-runs", "bm25.ap")
+
+    if os.path.exists(run_output_path):
+        os.remove(run_output_path)
+    if os.path.exists(run_output_path):
+        os.remove(ap_output_path)
 
     reader = csv.reader(open(extracted_queries_path, "r"), delimiter="\t")
     run = dict()
@@ -115,3 +131,6 @@ if __name__ == "__main__":
         run[qid] = searcher.raw_search(query_text, 1000)
         print(f"Stored run for query {qid}")
     store_run(run, run_output_path, runid="bm25", append=True)
+    aps = searcher.get_APs_from_run(run)
+    store_ap(aps, ap_output_path, append=True)
+    store_mean_ap(ap_output_path)

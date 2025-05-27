@@ -2,16 +2,17 @@ import csv
 import os
 from collections import defaultdict
 from types import SimpleNamespace
+from typing import Union
 
 from classes import QueryVector
 
 
 # Input:
-# qrel: Dictionary containing the mapping dict("qid" -> dict(("docid" -> relevance))
+# qrel: Dictionary containing the mapping dict("qid" -> dict("docid" -> relevance))
 # qrel_output_path: Path to save the qrel file
 def store_qrel(qrel: dict[str, dict[str, int]], qrel_output_path: str, append=False):
     os.makedirs(os.path.dirname(qrel_output_path), exist_ok=True)
-    with open(qrel_output_path, "w" if append else "w") as f:
+    with open(qrel_output_path, "a" if append else "w") as f:
         writer = csv.writer(f, delimiter="\t")
         for qid, relevances in qrel.items():
             for docid, rel in relevances.items():
@@ -38,9 +39,9 @@ def store_run(
 # Input:
 # aps: Dictionary containing the mapping dict("qid" -> AP)
 # ap_file_path: Path to the AP file
-def store_ap(aps: dict[str, float], ap_file_path: str, append=False):
-    os.makedirs(os.path.dirname(ap_file_path), exist_ok=True)
-    with open(ap_file_path, "a" if append else "w") as f:
+def store_ap(aps: dict[str, float], ap_output_path: str, append=False):
+    os.makedirs(os.path.dirname(ap_output_path), exist_ok=True)
+    with open(ap_output_path, "a" if append else "w") as f:
         writer = csv.writer(f, delimiter="\t")
         for qid, ap in aps.items():
             writer.writerow(["map", qid, ap])
@@ -49,7 +50,7 @@ def store_ap(aps: dict[str, float], ap_file_path: str, append=False):
 # Input:
 # weight_file_path: Path to the weight file
 # Output: Dictionary containing the mapping dict("qid" -> QueryVector)
-# Each QueryVector is (basically) a dictionary mapping dict("term" -> weight)
+# Each QueryVector object is (basically) a dictionary mapping dict("term" -> weight)
 def parse_queries(weight_file_path: str) -> dict[str, QueryVector]:
     with open(weight_file_path, "r") as f:
         query_vectors = defaultdict(QueryVector)
@@ -77,3 +78,24 @@ def parse_ap(ap_file_path: str) -> dict[str, float]:
             ap = float(row[2])
             aps[qid] = ap
     return aps
+
+
+# Input:
+# ap_file_path: Path to AP file to append the MAP
+def store_mean_ap(ap_file_path: str) -> Union[None, float]:
+    aps = parse_ap(ap_file_path)
+    if len(aps) == 0:
+        return None
+    if "all" in aps.keys():
+        map = aps["all"]
+        print(f"Mean AP: {map}")
+        return map
+    map = 0.0
+    for qid, ap in aps.items():
+        map += ap
+    map /= len(aps)
+    print(f"Mean AP: {map}")
+    with open(ap_file_path, "a") as f:
+        writer = csv.writer(f, delimiter="\t")
+        writer.writerow(["map", "all", map])
+    return map

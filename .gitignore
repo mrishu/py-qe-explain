@@ -12,3 +12,7 @@ similarity-correlation/output*
 **/*.tar.gz
 **/*.pkl
 **/*.pickle
+correlation-computations/*
+_*
+studies/*
+results/*

@@ -27,7 +27,7 @@ from classes import (
     TRECQuery,
     QueryVector,
 )
-from utils import store_run
+from utils import store_run, store_ap
 from searcher import SearchAndEval
 
 ## Lucene imports
@@ -284,7 +284,9 @@ class IdealQueryGeneration(SearchAndEval):
                 format="%(message)s",
             )
         current_map, _ = self.computeAP_and_run(qid, query_vector)
-        if current_map is None:  # if relevance not present in qrel file, nothing to do
+        if (
+            current_map is None
+        ):  # if relevance information not present in qrel file, nothing to do
             return query_vector
         for mag in tweak_magnitude_list:
             for term, stat in query_vector.vector.items():
@@ -318,6 +320,7 @@ class IdealQueryGeneration(SearchAndEval):
         weights_store_path: str,
         ideal_query_pickle_dir: str,
         run_store_path: str,
+        ap_store_path: str,
         alpha=2.0,
         beta=64.0,
         gamma=64.0,
@@ -382,6 +385,8 @@ class IdealQueryGeneration(SearchAndEval):
                     runid=runid,
                     append=True,
                 )
+                aps = {qid: final_ap}
+                store_ap(aps, ap_output_path=ap_store_path, append=True)
 
             ## STEP 8: Store tweaked query weights
             query_rocchio_vector.store_txt(qid, weights_store_path, append=True)
@@ -396,7 +401,9 @@ if __name__ == "__main__":
     index_path = TREC_INDEX_DIR_PATH
     stopwords_path = STOPWORDS_FILE_PATH
     actual_qrel_path = TREC_QREL_FILE_PATH
-    # restrict_qrel_path = os.path.join(ROOT_DIR, "qrels", "bm25_intersect_trec678rb.qrel")
+    # restrict_qrel_path = os.path.join(
+    #     ROOT_DIR, "qrels", "bm25_intersect_trec678rb.qrel"
+    # )
     restrict_qrel_path = None  # use actual_qrel_path as restrict_qrel_path
 
     iqg = IdealQueryGeneration(
@@ -454,6 +461,11 @@ if __name__ == "__main__":
             f"{args.runid}.term_weights",
         )
         run_store_path = os.path.join(ideal_query_base_dir, "runs", f"{args.runid}.run")
+    ap_store_path = os.path.join(
+        ideal_query_base_dir,
+        "aps",
+        f"{args.runid}.ap",
+    )
 
     ideal_query_pickle_dir = os.path.join(ROOT_DIR, "ideal-queries-pickle", "trec678")
 
@@ -467,6 +479,7 @@ if __name__ == "__main__":
         weights_store_path,
         ideal_query_pickle_dir,
         run_store_path,
+        ap_store_path,
         alpha,
         beta,
         gamma,

@@ -50,6 +50,15 @@ class QueryVector:
     def __iter__(self):
         return self.vector.__iter__()
 
+    def items(self):
+        return self.vector.items()
+
+    def values(self):
+        return self.vector.values()
+
+    def keys(self):
+        return self.vector.keys()
+
     def store_txt(self, qid, store_path: str, append=True, store_positive=True) -> None:
         os.makedirs(os.path.dirname(store_path), exist_ok=True)
         self.sort_by_stat()  # always sort according to weight before storing
@@ -76,6 +85,7 @@ class QueryVector:
             bool_query_builder.add(term_query, BooleanClause.Occur.SHOULD)
         return bool_query_builder.build()
 
+    # default: sort by weight
     def sort_by_stat(self, sortkey=lambda stat: stat.weight, reverse=True) -> None:
         self.vector = OrderedDict(
             sorted(self.vector.items(), key=lambda x: sortkey(x[1]), reverse=reverse)
@@ -91,7 +101,7 @@ class QueryVector:
         final_str = "Query Vector:\n"
         x = 0
         for term, stat in self.vector.items():
-            final_str += f"{term:20s}{stat.weight:20.3f}\t{stat.rel_docs_freq:20d}\t{stat.doc_freq:20d}\t{stat.rel_total_weight:20.3f}\n"
+            final_str += f"{term:20s}{stat}\n"
             x += 1
             if x >= 200:  # display only upto 200 terms
                 break
@@ -108,12 +118,22 @@ class QueryVector:
                 added_vector[term].weight = stat.weight
         return QueryVector(added_vector)
 
-    def __mul__(self, other: "QueryVector") -> float:
-        dot_product = 0
-        intersection_terms = self.vector.keys() & other.vector.keys()
-        for term in intersection_terms:
-            dot_product += self[term].weight * other[term].weight
-        return dot_product
+    def __sub__(self, other: "QueryVector") -> "QueryVector":
+        added_vector = defaultdict(SimpleNamespace)
+        for term, stat in self.vector.items():
+            added_vector[term].weight = stat.weight
+        for term, stat in other.vector.items():
+            if term in added_vector:
+                added_vector[term].weight += stat.weight
+            else:
+                added_vector[term].weight = stat.weight
+        return QueryVector(added_vector)
+
+    def __mul__(self, other: Union[float, int]) -> "QueryVector":
+        mul_vector = defaultdict(SimpleNamespace)
+        for term in self.vector.keys():
+            mul_vector[term].weight = self.vector[term].weight * other
+        return QueryVector(mul_vector)
 
     def __truediv__(self, other: Union[float, int]) -> "QueryVector":
         if other == 0.0:

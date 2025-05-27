@@ -1,7 +1,0 @@
-Correlation over 80 pairs
-avg corr pearson:  0.32850289256426674
-# non nan point for how many queries :  248
-avg corr kendall:  0.2526529360617039
-# non nan point for how many queries (kendall, file=f) :  248
-avg corr spearman:  0.33340652354355166
-# non nan point for how many queries (spearman, file=f) :  248
