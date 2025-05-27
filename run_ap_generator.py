@@ -28,14 +28,12 @@ print("Index initialized")
 
 query_vectors = parse_queries(args.weight_file)
 
-# ## For expanded queries, extract num terms from the file name
-# num_terms = int(
-#     os.path.basename(args.weight_file).split("-")[1]
-# )  # for trimming as per given number of terms in expanded query files
+# For expanded queries, extract num terms from the file name
+num_terms = int(os.path.basename(args.weight_file).split("-")[1])
 
 # num_terms = 1000
 # num_terms = 200
-num_terms = None
+# num_terms = None
 
 for qid, query_vector in query_vectors.items():
     query_vector.remove_non_positive_weights()

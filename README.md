@@ -11,7 +11,7 @@ This project depends on several packages, including:
 To install the necessary dependencies, run:
 
 ```bash
-pip install pytrec_eval tqdm scipy numpy
+pip install pytrec_eval tqdm scipy numpy matplotlib
 ```
 
 Additionally, GNU `parallel` is required, which is available in the standard repositories of most Linux distributions.
@@ -101,13 +101,12 @@ This produces a restricted `qrel` file: `qrels/bm25_intersect_trec678rb.qrel`.
 
 ## Ideal Queries
 
-### Extracting the Ideal Queries
-
-```bash
-tar -xvzf ideal-queries.tar.gz
-```
-
 ### Generating Ideal Queries
+
+- For generating ideal query on restricted ground truth, in the `__main__` section of `iqg.py`, make
+  sure that the `restrict_qrel_path` is set to the restricted `qrel` file.
+- For generating ideal query on the complete ground truth, in the `__main__` section of `iqg.py`, make
+  sure that `restrict_qrel_path` is set to `None`.
 
 #### Method 1: Without Parallelization (Clean Output)
 
@@ -147,9 +146,6 @@ mkdir -p ideal-queries/trec678/aps/
 trec_eval -m map -q qrels/trec678rb.qrel ideal-queries/trec678/runs/ideal_query_restrict.run > ideal-queries/trec678/aps/ideal_query_restrict.ap
 ```
 
-**NOTE**: In `similarity-correlation/project_globals.py`, `term_weight_file["ideal"]` and `ap_file["ideal"]`
-can be changed to point to appropriate ideal query files.
-
 ---
 
 ## Expanded Queries
@@ -157,10 +153,6 @@ can be changed to point to appropriate ideal query files.
 [Download Expanded Queries](https://drive.google.com/file/d/1--By6ottQYm9qmV6yP7RQd4ik9Jv60RK/view?usp=drive_link)
 
 ### Extracting the Expanded Queries
-
-```bash
-tar -xvzf expanded-queries.tar.gz
-```
 
 ### Generating `run` and `ap` Files
 
@@ -178,15 +170,11 @@ _(Default: 12 parallel jobs)_
 
 ## Computing Similarity and Correlation
 
-No modifications were made to these scripts apart from input/output filenames. The similarity-correlation computations can be run as follows:
+Change the `ideal_q_runid` in `compute-correlation.py` to the runid of the ideal query which is to be considered.
 
 ```bash
-cd similarity-correlation
-python3 compute-correlation-mm.py <similarity_measure>
+python3 compute-correlation.py
 ```
-
-where `<similarity_measure>` can be one of:
-`'j', 'j1', 'j2', 'l1', 'l2', 'n', 'n1', 'n2'`.
 
 ---
 
