@@ -8,7 +8,7 @@ This project depends on several packages, including:
 - [pytrec_eval](https://github.com/cvangysel/pytrec_eval)
 - tqdm (for progress bars)
 
-[Steps to install PyLucene10](https://mrishu.github.io/blog/2025/installing-pylucene10/)
+[Steps to install PyLucene10 in a conda environment](https://mrishu.github.io/blog/2025/installing-pylucene10/)
 
 To install the necessary dependencies, run:
 
@@ -17,6 +17,10 @@ pip install pytrec_eval tqdm scipy numpy matplotlib
 ```
 
 Additionally, GNU `parallel` is required, which is available in the standard repositories of most Linux distributions.
+
+```bash
+sudo apt install parallel
+```
 
 ## Preliminary Results
 
