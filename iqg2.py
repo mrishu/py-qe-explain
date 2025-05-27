@@ -306,21 +306,23 @@ if __name__ == "__main__":
     qrel_path = TREC_QREL_FILE_PATH
 
     iqg2 = IdealQueryGeneration2(index_dir, stopwords_path, qrel_path)
-
     qid_range = chain(range(301, 451), range(601, 701))
+
+    #####################################
+    ideal_q_runid = "ideal_query_chi2_lr"
     num_after_chi2_terms = 10000
     var_thershold = 1e-4
-    runid = "ideal_query_chi2_lr"
     num_save_terms = 1000
     # num_save_terms = None  # set to None to save all terms
+    #####################################
 
     ideal_query_path = os.path.join(ROOT_DIR, "ideal-queries", "trec678")
 
     weight_save_file = os.path.join(
-        ideal_query_path, "weights", f"{runid}.term_weights"
+        ideal_query_path, "weights", f"{ideal_q_runid}.term_weights"
     )
-    run_save_file = os.path.join(ideal_query_path, "runs", f"{runid}.run")
-    ap_save_file = os.path.join(ideal_query_path, "aps", f"{runid}.ap")
+    run_save_file = os.path.join(ideal_query_path, "runs", f"{ideal_q_runid}.run")
+    ap_save_file = os.path.join(ideal_query_path, "aps", f"{ideal_q_runid}.ap")
 
     if (
         os.path.exists(weight_save_file)
@@ -328,7 +330,7 @@ if __name__ == "__main__":
         or os.path.exists(ap_save_file)
     ):
         inp = input(
-            f"Either of weights, run or ap files of ideal query {runid} exists. Overwrite (Y/N): "
+            f"Either of weights, run or ap files of ideal query {ideal_q_runid} exists. Overwrite (Y/N): "
         )
         if inp == "y" or inp == "Y":
             if os.path.exists(weight_save_file):
@@ -344,7 +346,7 @@ if __name__ == "__main__":
         qid_range,
         num_after_chi2_terms,
         var_thershold,
-        runid,
+        ideal_q_runid,
         num_save_terms,
         weight_save_file,
         run_save_file,

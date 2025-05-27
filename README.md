@@ -223,8 +223,9 @@ python3 compute-correlation.py
 
 ## Generating Logistic Regression Ideal Queries
 
-Just run:
+1. Change `ideal_q_runid` and other parameters.
+2. Run:
 
-```bash
-python3 iqg2.py
-```
+   ```bash
+   python3 iqg2.py
+   ```
