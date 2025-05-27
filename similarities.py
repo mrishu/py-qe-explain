@@ -169,10 +169,10 @@ if __name__ == "__main__":
         n2.append(sim.ndcg_modified_2())
         print(
             qid,
-            sim.jaccard(),
-            sim.l1_similarity(),
-            sim.l2_similarity(),
-            sim.ndcg_modified_2(),
+            j[-1],
+            l1[-1],
+            l2[-1],
+            n2[-1],
             len(sim.ideal_query),
             len(sim.expanded_query),
             sep="\t",
