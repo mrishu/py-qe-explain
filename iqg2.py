@@ -269,7 +269,7 @@ class IdealQueryGeneration2(SearchAndEval):
         ap_dict = {qid: ap}
         store_run(run, run_save_file, runid, append=True)
         store_ap(ap_dict, ap_save_file, append=True)
-        qvec.store_txt(qid, weight_save_file, append=True, store_positive=False)
+        qvec.store_txt(qid, weight_save_file, append=True)
         print("Done!")
         print()
 
