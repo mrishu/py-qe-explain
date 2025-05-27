@@ -4,9 +4,14 @@
 
 This project depends on several packages, including:
 
+- python 3.11
 - [pylucene-10.0.0](https://dlcdn.apache.org/lucene/pylucene/)
 - [pytrec_eval](https://github.com/cvangysel/pytrec_eval)
 - tqdm (for progress bars)
+- numpy
+- scipy
+- matplotlib
+- GNU parallel
 
 [Steps to install PyLucene10 in a conda environment](https://mrishu.github.io/blog/2025/installing-pylucene10/)
 
