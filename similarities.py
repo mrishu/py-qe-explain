@@ -29,6 +29,12 @@ class Similarities:
     def __init__(self, qid, ideal_query: QueryVector):
         self.qid = qid
         self.ideal_query = ideal_query
+        self.l2_idealq = norm(
+            np.array([stat.weight for stat in self.ideal_query.vector.values()])
+        )
+        self.l1_idealq = sum(
+            [abs(stat.weight) for stat in self.ideal_query.vector.values()]
+        )
 
     def change_expanded_query(self, expanded_query: QueryVector):
         self.expanded_query = expanded_query
@@ -39,12 +45,6 @@ class Similarities:
         self.dot_product = sum(
             self.ideal_query[term].weight * self.expanded_query[term].weight
             for term in self.intersection
-        )
-        self.l2_idealq = norm(
-            np.array([stat.weight for stat in self.ideal_query.vector.values()])
-        )
-        self.l1_idealq = sum(
-            [abs(stat.weight) for stat in self.ideal_query.vector.values()]
         )
 
     def print_matches(self, outfile_path: str, append=True):
