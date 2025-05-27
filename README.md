@@ -209,3 +209,11 @@ python3 compute-correlation.py
 | Pearson     | 0.06415343859352021  | 0.04582163064420157    |
 | Kendall     | 0.046892955913689124 | 0.03735461453626145    |
 | Spearman    | 0.07066278962536988  | 0.055134640052953016   |
+
+## Generating Logistic Regression Ideal Queries
+
+Just run:
+
+```bash
+python3 iqg2.py
+```

@@ -312,7 +312,7 @@ if __name__ == "__main__":
     var_thershold = 1e-4
     runid = "ideal_query_chi2_lr"
     num_save_terms = 1000
-    # num_save_terms = None ## None to save all terms
+    # num_save_terms = None  # set to None to save all terms
 
     ideal_query_path = os.path.join(ROOT_DIR, "ideal-queries", "trec678")
 
