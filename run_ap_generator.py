@@ -27,10 +27,12 @@ searcher = SearchAndEval(TREC_INDEX_DIR_PATH, STOPWORDS_FILE_PATH, TREC_QREL_FIL
 print("Index initialized")
 
 query_vectors = parse_queries(args.weight_file)
-## For expanded queries, extract num terms from the file name
+
+# ## For expanded queries, extract num terms from the file name
 # num_terms = int(
 #     os.path.basename(args.weight_file).split("-")[1]
 # )  # for trimming as per given number of terms in expanded query files
+
 # num_terms = 1000
 # num_terms = 200
 num_terms = None

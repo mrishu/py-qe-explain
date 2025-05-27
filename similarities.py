@@ -128,62 +128,6 @@ class Similarities:
 
         return sim / ideal_sim
 
-    def intersection_sim(self) -> float:
-        assert hasattr(self, "expanded_query")
-        return len(self.intersection)
-
-    def js_similarity(self, log_base=2) -> float:
-        vec1 = np.array(
-            [
-                self.ideal_query.vector.get(term, SimpleNamespace(weight=0.0)).weight
-                for term in self.intersection
-            ],
-            dtype=np.float64,
-        )
-        vec2 = np.array(
-            [
-                self.expanded_query.vector.get(term, SimpleNamespace(weight=0.0)).weight
-                for term in self.intersection
-            ],
-            dtype=np.float64,
-        )
-
-        # Clip small values to avoid numerical issues
-        epsilon = 1e-12
-        vec1 = np.clip(vec1, epsilon, None)
-        vec2 = np.clip(vec2, epsilon, None)
-
-        # Compute Jensen-Shannon divergence
-        js_dist = jensenshannon(vec1, vec2, base=log_base)
-        return 1 - js_dist**2
-
-    def wasserstein_similarity(self, lamda=1) -> float:
-        assert hasattr(self, "expanded_query")
-        self.intersection = sorted(
-            self.intersection, key=lambda x: self.ideal_query[x].weight, reverse=True
-        )
-        if len(self.intersection) == 0:
-            return 0.0
-        vec1 = np.array(
-            [
-                self.ideal_query.vector.get(term, SimpleNamespace(weight=0.0)).weight
-                for term in self.intersection
-            ],
-            dtype=np.float64,
-        )
-        vec2 = np.array(
-            [
-                self.expanded_query.vector.get(term, SimpleNamespace(weight=0.0)).weight
-                for term in self.intersection
-            ],
-            dtype=np.float64,
-        )
-
-        # Compute Jensen-Shannon divergence
-        positions = [x for x in range(1, len(self.intersection) + 1, 1)]
-        wd = wasserstein_distance(positions, positions, vec1, vec2)
-        return np.exp(-lamda * wd)
-
     def compute_similarity(self, sim_name: str) -> float:
         assert hasattr(self, "expanded_query")
         sims = {
@@ -191,9 +135,6 @@ class Similarities:
             "l1": "l1_similarity",
             "l2": "l2_similarity",
             "n2": "ndcg_modified_2",
-            "inter": "intersection_sim",
-            "js": "js_similarity",
-            "w": "wasserstein_similarity",
         }
         return getattr(self, sims[sim_name])()
 
@@ -201,13 +142,10 @@ class Similarities:
 # This __main__ part can be used to explicitly check the similarities of two queries
 if __name__ == "__main__":
     ideal_query_weight_file = (
-        "./ideal-queries/trec678/weights/ideal_query_chi2_lr_max.term_weights"
+        "./ideal-queries/trec678/weights/ideal_query_chi2_lr.term_weights"
     )
-    # expanded_query_weight_file = (
-    #     "./ideal-queries/trec678/weights/ideal_query.term_weights"
-    # )
     expanded_query_weight_file = (
-        "./expanded-queries-max-terms/trec678/spl/weights/spl-10-8.term_weights"
+        "./ideal-queries/trec678/weights/ideal_query.term_weights"
     )
 
     ideal_queries = parse_queries(ideal_query_weight_file)
@@ -232,18 +170,12 @@ if __name__ == "__main__":
         l1.append(sim.l1_similarity())
         l2.append(sim.l2_similarity())
         n2.append(sim.ndcg_modified_2())
-        js.append(sim.js_similarity())
-        inter.append(sim.intersection_sim())
-        w.append(sim.wasserstein_similarity())
         print(
             qid,
             sim.jaccard(),
             sim.l1_similarity(),
             sim.l2_similarity(),
             sim.ndcg_modified_2(),
-            sim.js_similarity(),
-            sim.wasserstein_similarity(),
-            sim.intersection_sim(),
             len(sim.ideal_query),
             len(sim.expanded_query),
             sep="\t",
@@ -254,8 +186,5 @@ if __name__ == "__main__":
         sum(l1) / len(l1),
         sum(l2) / len(l2),
         sum(n2) / len(n2),
-        sum(js) / len(js),
-        sum(w) / len(w),
-        sum(inter) / len(inter),
         sep="\t",
     )

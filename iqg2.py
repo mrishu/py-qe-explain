@@ -310,7 +310,7 @@ if __name__ == "__main__":
     qid_range = chain(range(301, 451), range(601, 701))
     num_after_chi2_terms = 10000
     var_thershold = 1e-4
-    runid = "ideal_query_chi2_lr_testing"
+    runid = "ideal_query_chi2_lr"
     num_save_terms = 1000
     # num_save_terms = None ## None to save all terms
 
