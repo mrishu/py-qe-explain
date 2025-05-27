@@ -130,13 +130,16 @@ This produces:
 
 #### Method 2: With Parallelization
 
+- Change the `ideal_q_runid` variable in `parallel_ideal_query_generator` to the required one.
+- Run
+
 ```bash
-./parallel_ideal_query_computer <number_of_jobs>
+./parallel_ideal_query_generator <number_of_jobs>
 ```
 
 _(Default: 12 parallel jobs)_
 
-Merge the split files into a single `run` and `term_weights` file:
+- Merge the split files into a single `run` and `term_weights` file:
 
 ```bash
 cat ideal-queries/trec678/weights/ideal_query_restrict-split/* > ideal-queries/trec678/weights/ideal_query_restrict.term_weights
@@ -148,7 +151,7 @@ cat ideal-queries/trec678/runs/ideal_query_restrict-split/* > ideal-queries/trec
 
 ---
 
-Irrespective of whether parallelization was used or not, generate the `ap` file using:
+- Irrespective of whether parallelization was used or not, generate the `ap` file using:
 
 ```bash
 mkdir -p ideal-queries/trec678/aps/
