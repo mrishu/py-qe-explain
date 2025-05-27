@@ -152,8 +152,6 @@ trec_eval -m map -q qrels/trec678rb.qrel ideal-queries/trec678/runs/ideal_query_
 
 [Download Expanded Queries](https://drive.google.com/file/d/1--By6ottQYm9qmV6yP7RQd4ik9Jv60RK/view?usp=drive_link)
 
-### Extracting the Expanded Queries
-
 ### Generating `run` and `ap` Files
 
 Expanded query weights were taken provided by Sourav Da ([expanded-queries-weights-only](https://drive.google.com/file/d/1PutRi-rUFQ0a4QfJ157lfHK1VXOmf3hk/view?usp=sharing)) and `run` and `ap` files were generated using `run_ap_generator.py`.
