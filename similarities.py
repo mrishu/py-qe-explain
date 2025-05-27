@@ -155,9 +155,6 @@ if __name__ == "__main__":
     l1 = []
     l2 = []
     n2 = []
-    js = []
-    inter = []
-    w = []
     for qid, ideal_query in ideal_queries.items():
         if qid not in expanded_queries:
             continue
