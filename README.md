@@ -8,6 +8,8 @@ This project depends on several packages, including:
 - [pytrec_eval](https://github.com/cvangysel/pytrec_eval)
 - tqdm (for progress bars)
 
+[Steps to install PyLucene10](https://mrishu.github.io/blog/2025/installing-pylucene10/)
+
 To install the necessary dependencies, run:
 
 ```bash
