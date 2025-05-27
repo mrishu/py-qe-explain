@@ -4,7 +4,7 @@ import csv
 ap_file1 = "./ideal-queries/trec678/aps/ideal_query.ap"
 ap_file2 = "./ideal-queries/trec678/aps/ideal_query_chi2_lr.ap"
 outfile = "./studies/qbyq_comparision.txt"
-num_rel_file = "./studies/num_rel_docs.txt"
+num_rel_file = "./num_rel_docs.txt"
 
 num_rel = {}
 with open(num_rel_file, "r") as f:
