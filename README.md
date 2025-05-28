@@ -139,7 +139,7 @@ This produces:
 
 _(Default: 12 parallel jobs)_
 
-- Merge the split files into a single `run` and `term_weights` file:
+- Merge the split files into a single `run`, `ap` and `term_weights` file:
 
 ```bash
 cat ideal-queries/trec678/weights/ideal_query_restrict-split/* > ideal-queries/trec678/weights/ideal_query_restrict.term_weights
@@ -149,13 +149,8 @@ cat ideal-queries/trec678/weights/ideal_query_restrict-split/* > ideal-queries/t
 cat ideal-queries/trec678/runs/ideal_query_restrict-split/* > ideal-queries/trec678/runs/ideal_query_restrict.run
 ```
 
----
-
-- Irrespective of whether parallelization was used or not, generate the `ap` file using:
-
 ```bash
-mkdir -p ideal-queries/trec678/aps/
-trec_eval -m map -q qrels/trec678rb.qrel ideal-queries/trec678/runs/ideal_query_restrict.run > ideal-queries/trec678/aps/ideal_query_restrict.ap
+cat ideal-queries/trec678/aps/ideal_query_restrict-split/* > ideal-queries/trec678/aps/ideal_query_restrict.ap
 ```
 
 ---
