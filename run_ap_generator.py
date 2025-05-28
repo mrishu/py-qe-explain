@@ -23,6 +23,11 @@ dirname = Path(args.weight_file).absolute().parent.parent
 store_run_file = os.path.join(dirname, "runs", f"{runid}.run")
 store_ap_file = os.path.join(dirname, "aps", f"{runid}.ap")
 
+if os.path.exists(store_run_file):
+    os.remove(store_run_file)
+if os.path.exists(store_ap_file):
+    os.remove(store_ap_file)
+
 searcher = SearchAndEval(TREC_INDEX_DIR_PATH, STOPWORDS_FILE_PATH, TREC_QREL_FILE_PATH)
 print("Index initialized")
 
