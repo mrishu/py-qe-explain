@@ -18,7 +18,7 @@ weights_store_path = (
 run_store_path = "./ideal-queries/trec678/runs/ideal_query_chi2_lr_pruned.run"
 ap_store_path = "./ideal-queries/trec678/aps/ideal_query_chi2_lr_pruned.ap"
 
-# Trimming
+# Trimming before tweaking
 num_terms = 200
 # num_terms = None  # for no trimming
 ########################################

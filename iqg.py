@@ -402,7 +402,7 @@ if __name__ == "__main__":
     actual_qrel_path = TREC_QREL_FILE_PATH
     restrict_qrel_path = os.path.join(
         ROOT_DIR, "qrels", "bm25_intersect_trec678rb.qrel"
-    )
+    )  # use restricted qrel
     # restrict_qrel_path = None  # use actual_qrel_path as restrict_qrel_path
 
     iqg = IdealQueryGeneration(

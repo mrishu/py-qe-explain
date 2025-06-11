@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # This file generates the run and ap files using run_ap_generator for all the expanded queries
-# Do this if not all already generated
+# Do this if not already generated
 
 if [ $# -eq 0 ]; then
     num_jobs=12 # Set a default value
