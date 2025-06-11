@@ -159,8 +159,6 @@ if __name__ == "__main__":
         if qid not in expanded_queries:
             continue
         expanded_query = expanded_queries[qid]
-        expanded_query.trim(200)
-        ideal_query.trim(200)
         sim = Similarities(qid, ideal_query)
         sim.change_expanded_query(expanded_query)
         j.append(sim.jaccard())

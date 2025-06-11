@@ -12,7 +12,6 @@ import logging
 
 ## Extra imports
 import pytrec_eval
-from tqdm import tqdm
 
 ## Local Imports
 from definitions import (
@@ -195,7 +194,7 @@ class IdealQueryGeneration(SearchAndEval):
                 "wb",
             ) as pickle_file:
                 pickle.dump(termstats, pickle_file)
-        tqdm.write(f"No. of terms collected: {len(termstats)}")
+        print(f"No. of terms collected: {len(termstats)}")
         return termstats
 
     def compute_rocchio_vector(
@@ -293,7 +292,7 @@ class IdealQueryGeneration(SearchAndEval):
                 nudged_weight = (1 + mag) * current_weight
                 query_vector[term].weight = nudged_weight
                 nudged_map, _ = self.computeAP_and_run(qid, query_vector)
-                tqdm.write(
+                print(
                     f"Term: {term:20s}Current Weight: {current_weight:.3f}, Current AP: {current_map:.3f}, Tweak Magnitude: {mag}"
                 )
                 assert nudged_map is not None
@@ -302,13 +301,13 @@ class IdealQueryGeneration(SearchAndEval):
                         f"{qid}\t{mag}\t{term}\t{current_weight}\t{nudged_weight}\t{current_map}\t{nudged_map}"
                     )
                 if nudged_map >= current_map:
-                    tqdm.write(
+                    print(
                         f"Term: {term:20s}Nudged  Weight: {nudged_weight:.3f}, Nudged  AP: {nudged_map:.3f} -- Keeping   Nudged Weight"
                     )
                     current_map = nudged_map
                 else:
                     query_vector[term].weight = current_weight
-                    tqdm.write(
+                    print(
                         f"Term: {term:20s}Nudged  Weight: {nudged_weight:.3f}, Nudged  AP: {nudged_map:.3f} -- Reverting Nudged Weight"
                     )
         return query_vector
