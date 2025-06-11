@@ -7,7 +7,6 @@ import pickle
 
 from definitions import CONTENTS_FIELD
 
-
 ## Lucene imports
 from org.apache.lucene.index import Term
 from org.apache.lucene.search import TermQuery
@@ -82,7 +81,7 @@ class QueryVector:
             bool_query_builder.add(term_query, BooleanClause.Occur.SHOULD)
         return bool_query_builder.build()
 
-    # default: sort by weight
+    # default: sort by weight in descending order
     def sort_by_stat(self, sortkey=lambda stat: stat.weight, reverse=True) -> None:
         self.vector = OrderedDict(
             sorted(self.vector.items(), key=lambda x: sortkey(x[1]), reverse=reverse)
@@ -144,6 +143,14 @@ class QueryVector:
         new_vector = OrderedDict()
         for term, stat in self.vector.items():
             if stat.weight <= 0:
+                continue
+            new_vector[term] = stat
+        self.vector = new_vector
+
+    def remove_zero_weights(self) -> None:
+        new_vector = OrderedDict()
+        for term, stat in self.vector.items():
+            if stat.weight == 0:
                 continue
             new_vector[term] = stat
         self.vector = new_vector

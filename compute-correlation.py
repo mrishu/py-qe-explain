@@ -97,9 +97,11 @@ for sim_name in similarity_names:
     paired_list_file_name = f"paired-lists-{sim_name}.csv"
     query_wise_corr_file_name = f"paired-lists-{sim_name}.csv"
     print("Writing", paired_list_file_name)
-    paired_list_file = open(os.path.join(output_dir, paired_list_file_name))
+    paired_list_file = open(os.path.join(output_dir, paired_list_file_name), "w")
     print("Writing", f"query-wise-correlation-{sim_name}.csv")
-    query_wise_corr_file = open(os.path.join(output_dir, query_wise_corr_file_name))
+    query_wise_corr_file = open(
+        os.path.join(output_dir, query_wise_corr_file_name), "w"
+    )
 
     pearson_corr_list = []
     kendall_corr_list = []

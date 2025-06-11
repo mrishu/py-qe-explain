@@ -5,7 +5,6 @@ import math
 import re
 from types import SimpleNamespace
 from typing import Union
-import xml.etree.ElementTree as ET
 import csv
 import argparse
 import pickle
