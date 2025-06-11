@@ -40,13 +40,15 @@ num_terms = int(os.path.basename(args.weight_file).split("-")[1])
 # num_terms = 200
 # num_terms = None
 
+num_top_docs = 1000  # no. of documents to be retrieved during retrieval
+
 for qid, query_vector in query_vectors.items():
     query_vector.remove_non_positive_weights()
     query_vector.sort_by_stat()
     if num_terms is not None:
         query_vector.trim(num_terms)  # trim upto top num_terms terms
     print(f"Running Query {qid}", end=" ")
-    ap, run = searcher.computeAP_and_run(qid, query_vector)
+    ap, run = searcher.computeAP_and_run(qid, query_vector, num_top_docs)
     ap_dict = dict()
     ap_dict[qid] = ap
     store_run(run, store_run_file, runid, append=True)

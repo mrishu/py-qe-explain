@@ -272,6 +272,7 @@ class IdealQueryGeneration(SearchAndEval):
         qid: str,
         query_vector: QueryVector,
         tweak_magnitude_list: list[float] = [4.0, 2.0, 1.0, 0.5, 0.25],
+        num_top_docs=1000,
         runid=None,  # for logging
     ) -> QueryVector:
         if runid:
@@ -281,7 +282,7 @@ class IdealQueryGeneration(SearchAndEval):
                 level=logging.DEBUG,
                 format="%(message)s",
             )
-        current_map, _ = self.computeAP_and_run(qid, query_vector)
+        current_map, _ = self.computeAP_and_run(qid, query_vector, num_top_docs)
         if (
             current_map is None
         ):  # if relevance information not present in qrel file, nothing to do
@@ -291,7 +292,7 @@ class IdealQueryGeneration(SearchAndEval):
                 current_weight = stat.weight
                 nudged_weight = (1 + mag) * current_weight
                 query_vector[term].weight = nudged_weight
-                nudged_map, _ = self.computeAP_and_run(qid, query_vector)
+                nudged_map, _ = self.computeAP_and_run(qid, query_vector, num_top_docs)
                 print(
                     f"Term: {term:20s}Current Weight: {current_weight:.3f}, Current AP: {current_map:.3f}, Tweak Magnitude: {mag}"
                 )
