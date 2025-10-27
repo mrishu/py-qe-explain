@@ -128,6 +128,24 @@ class Similarities:
 
         return sim / ideal_sim
 
+    def wasserstein_similarity(self):
+        assert hasattr(self, "expanded_query")
+        if len(self.intersection) == 0:
+            return 0
+        ideal_dist = [self.ideal_query[term].weight for term in self.intersection]
+        exp_dist = [self.expanded_query[term].weight for term in self.intersection]
+        support = [1 / self.ideal_query[term].weight for term in self.intersection]
+        w_dist = wasserstein_distance(
+            support,
+            support,
+            ideal_dist,
+            exp_dist,
+        )
+        return 1 / (1 + w_dist)
+
+    def dot_product_similarity(self):
+        return self.dot_product
+
     def compute_similarity(self, sim_name: str) -> float:
         assert hasattr(self, "expanded_query")
         sims = {
@@ -135,6 +153,8 @@ class Similarities:
             "l1": "l1_similarity",
             "l2": "l2_similarity",
             "n2": "ndcg_modified_2",
+            "w": "wasserstein_similarity",
+            "dp": "dot_product_similarity",
         }
         return getattr(self, sims[sim_name])()
 

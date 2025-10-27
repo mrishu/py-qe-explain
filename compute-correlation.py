@@ -1,13 +1,21 @@
 import os
+import numpy as np
 from itertools import product
 from collections import defaultdict
 from scipy.stats import pearsonr, kendalltau, spearmanr
 import csv
 import math
+import sys
+import shutil
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 
 from definitions import ROOT_DIR
 from utils import parse_queries, parse_ap
 from similarities import Similarities
+
+sns.color_palette("mako")
 
 # GLOBALS #
 ###########################################################
@@ -20,7 +28,7 @@ output_dir = os.path.join(
 if os.path.exists(output_dir):
     inp = input("Output directory already exists. Overwrite? (Y/N): ")
     if (inp == "y") or (inp == "Y"):
-        os.rmdir(output_dir)
+        shutil.rmtree(output_dir)
     else:
         exit(1)
 os.makedirs(output_dir)
@@ -95,8 +103,8 @@ for exp_method, num_docs, num_terms in product(
 
 for sim_name in similarity_names:
     paired_list_file_name = f"paired-lists-{sim_name}.csv"
-    query_wise_corr_file_name = f"paired-lists-{sim_name}.csv"
-    print("Writing", paired_list_file_name)
+    query_wise_corr_file_name = f"query-wise-correlation-{sim_name}.csv"
+    print("\n\nWriting", paired_list_file_name)
     paired_list_file = open(os.path.join(output_dir, paired_list_file_name), "w")
     print("Writing", f"query-wise-correlation-{sim_name}.csv")
     query_wise_corr_file = open(
@@ -135,36 +143,54 @@ for sim_name in similarity_names:
 
     summary_file_name = f"summary-{sim_name}.txt"
     print("Writing", summary_file_name)
+    summary_file = open(os.path.join(output_dir, summary_file_name), "w")
 
-    with open(os.path.join(output_dir, summary_file_name), "w") as summary_file:
-        print(f"Correlation over {num_correlation_pairs} pairs", file=summary_file)
+    for file in [summary_file, sys.stdout]:
+        print(f"Correlation over {num_correlation_pairs} pairs", file=file)
         print(
-            "avg corr pearson: ",
-            sum(pearson_corr_list) / max(len(pearson_corr_list), 1),
-            file=summary_file,
+            f"avg corr pearson: {np.mean(pearson_corr_list)} +- {np.std(pearson_corr_list)}",
+            file=file,
         )
         print(
-            "# non nan point for how many queries (pearson) : ",
-            len(pearson_corr_list),
-            file=summary_file,
+            f"# non nan point for how many queries (pearson) : {len(pearson_corr_list)}",
+            file=file,
         )
         print(
-            "avg corr kendall: ",
-            sum(kendall_corr_list) / max(len(kendall_corr_list), 1),
-            file=summary_file,
+            f"avg corr kendall: {np.mean(kendall_corr_list)} +- {np.std(kendall_corr_list)}",
+            file=file,
         )
         print(
-            "# non nan point for how many queries (kendall) : ",
-            len(kendall_corr_list),
-            file=summary_file,
+            f"# non nan point for how many queries (kendall) : {len(kendall_corr_list)}",
+            file=file,
         )
         print(
-            "avg corr spearman: ",
-            sum(spearman_corr_list) / max(len(spearman_corr_list), 1),
-            file=summary_file,
+            f"avg corr spearman: {np.mean(spearman_corr_list)} +- {np.std(spearman_corr_list)}",
+            file=file,
         )
         print(
-            "# non nan point for how many queries (spearman) : ",
-            len(spearman_corr_list),
-            file=summary_file,
+            f"# non nan point for how many queries (spearman) : {len(spearman_corr_list)}",
+            file=file,
         )
+
+    summary_file.close()
+
+    ## Distribution plotting of correlations
+    for correlation_name in ["pearson", "kendall", "spearman"]:
+        corrname_list_map = {
+            "pearson": pearson_corr_list,
+            "kendall": kendall_corr_list,
+            "spearman": spearman_corr_list,
+        }
+        data = corrname_list_map[correlation_name]
+
+        # sns.kdeplot(data, fill=True)
+        sns.histplot(data, kde=True, bins=50)
+
+        plt.title("Distribution of Correlation")
+        plt.xlabel("Correlation")
+        plt.ylabel("Frequency")
+
+        plt.savefig(
+            os.path.join(output_dir, f"distribution-{sim_name}-{correlation_name}.png"),
+        )
+        plt.close()

@@ -30,20 +30,20 @@ def plot_relevance_vs_query_length(query_vectors, relevance_file_path, label, co
 
 
 query_vectors1 = parse_queries(
-    "./ideal-queries/trec678/weights/ideal_query_short.term_weights"
+    "./ideal-queries/trec678/weights/ideal_query_torch_linear_rocchiotrunc_final.term_weights"
 )
-query_vectors2 = parse_queries(
-    "./ideal-queries/trec678/weights/ideal_query_chi2_lr_pruned.term_weights"
-)
+# query_vectors2 = parse_queries(
+#     "./ideal-queries/trec678/weights/ideal_query_chi2_lr_pruned.term_weights"
+# )
 numrel_file = "num_rel_docs.txt"
 
 plt.figure(figsize=(8, 6))
 plot_relevance_vs_query_length(
     query_vectors1, numrel_file, label="IEQ0Pruned", color="blue"
 )
-plot_relevance_vs_query_length(
-    query_vectors2, numrel_file, label="IEQ1Pruned", color="red"
-)
+# plot_relevance_vs_query_length(
+#     query_vectors2, numrel_file, label="IEQ1Pruned", color="red"
+# )
 
 plt.xlabel("Number of relevant documents")
 plt.ylabel("Number of terms in query")

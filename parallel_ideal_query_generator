@@ -1,11 +1,5 @@
 #!/bin/sh
 
-if [ $# -eq 0 ]; then
-    num_jobs=12 # Set a default value
-else
-    num_jobs="$1" # Use the first argument
-fi
+ideal_q_runid="ideal_query"
 
-ideal_q_runid="ideal_query_restrict"
-
-parallel --line-buffer --tag -j$num_jobs "python3 iqg.py {} --split --runid ideal_q_runid" ::: extracted-queries/trec678-split/*
+parallel --line-buffer --tag "python3 iqg.py {} --split --runid ${ideal_q_runid}" ::: extracted-queries/trec678-split/*

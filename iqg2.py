@@ -1,21 +1,18 @@
 import os
-import csv
-from os.path import exists
-import pickle
+import math
 import numpy as np
 from collections import defaultdict
-from numpy.random import weibull
 from sklearn.linear_model import LogisticRegression
-from sklearn.svm import LinearSVC
 from sklearn.feature_selection import (
     SelectKBest,
     chi2,
     VarianceThreshold,
 )
 from itertools import chain
-import pytrec_eval
-import math
 from types import SimpleNamespace
+import re
+import pickle
+import pytrec_eval
 
 from definitions import (
     ROOT_DIR,
@@ -30,6 +27,7 @@ from classes import QueryVector
 
 from org.apache.lucene.index import Term
 from org.apache.lucene.util import BytesRefIterator
+from org.apache.lucene.queryparser.classic import QueryParser
 
 
 class IdealQueryGeneration2(SearchAndEval):
@@ -71,6 +69,12 @@ class IdealQueryGeneration2(SearchAndEval):
                 (self.query_rel_docs_map, self.query_non_rel_docs_map),
                 pickle_file,
             )
+
+    def get_query_terms(self, query: str) -> list[str]:
+        query_text = re.sub(r'[/|,|"]', " ", query)
+        parsed_query = QueryParser(CONTENTS_FIELD, self.analyzer).parse(query_text)
+        query_terms = parsed_query.toString(CONTENTS_FIELD).strip().split()
+        return query_terms
 
     def compute_bm25_weight(
         self, term: str, tf: float, doc_len: float, is_query_term: bool = False
@@ -167,20 +171,27 @@ class IdealQueryGeneration2(SearchAndEval):
 
     def select_features(self, X, y, term_list, num_after_chi2_terms, var_threshold):
         # Step 1: Eliminate low-variance features
-        print("Removing low-variance features:", end=" ")
-        var_thresh = VarianceThreshold(threshold=var_threshold)
-        X_var = var_thresh.fit_transform(X)
-        var_support = var_thresh.get_support(indices=True)
-        term_list_var = [term_list[i] for i in var_support]
-        print(f"Remaining {len(term_list_var)} terms")
+        if var_threshold > 0:
+            print("Removing low-variance features:", end=" ")
+            var_thresh = VarianceThreshold(threshold=var_threshold)
+            X_var = var_thresh.fit_transform(X)
+            var_support = var_thresh.get_support(indices=True)
+            term_list_var = [term_list[i] for i in var_support]
+            print(f"Remaining {len(term_list_var)} terms")
+        else:
+            X_var = X
+            term_list_var = term_list
 
         # Step 2: Select top-K features using the specified method
+        if num_after_chi2_terms is None:
+            return X_var, term_list_var
         print(
             f"Running feature selection using chi2: Selecting {num_after_chi2_terms} terms"
         )
         selector = SelectKBest(
             score_func=chi2, k=min(num_after_chi2_terms, X_var.shape[1])
         )
+
         X_selected = selector.fit_transform(X_var, y)
         selected_indices = selector.get_support(indices=True)
         scores = selector.scores_[selected_indices]
@@ -189,6 +200,22 @@ class IdealQueryGeneration2(SearchAndEval):
         # Map back to the original term list
         final_terms = [term_list_var[i] for i in sorted_idx]
         return X_selected[:, np.argsort(scores)[::-1]], final_terms
+
+    def truncate_by_rocchio(
+        self, X, y, term_list, num_after_rocchio_terms=None, beta=64, gamma=64
+    ):
+        if num_after_rocchio_terms is None:
+            return X, term_list
+        print(f"Truncating by rocchio weight upto {num_save_terms} terms.")
+        rel_mean = np.sum(X[y == 1], axis=0) / np.sum(y == 1)
+        non_rel_mean = np.sum(X[y == 0], axis=0) / np.sum(y == 0)
+        rocchio = (beta * rel_mean - gamma * non_rel_mean).flatten()
+        rocchio_idx_sorted = np.argsort(rocchio)[::-1]
+        X_selected = X[:, rocchio_idx_sorted[:num_after_rocchio_terms]]
+        terms_selcted = [
+            term_list[i] for i in rocchio_idx_sorted[:num_after_rocchio_terms]
+        ]
+        return X_selected, terms_selcted
 
     def train_model(self, X, y):
         model = LogisticRegression(penalty="l2", solver="liblinear")
@@ -199,6 +226,7 @@ class IdealQueryGeneration2(SearchAndEval):
         self,
         qid,
         num_after_chi2_terms,
+        num_after_rocchio_terms,
         var_threshold,
         runid,
         num_save_terms,
@@ -232,16 +260,21 @@ class IdealQueryGeneration2(SearchAndEval):
             X, y, term_list, num_after_chi2_terms, var_threshold
         )
 
-        # Train Logistic Regression
+        # Feature Selection: Truncate by rocchio weight importance
+        X, term_list = self.truncate_by_rocchio(
+            X, y, term_list, num_after_rocchio_terms
+        )
+
+        # Train model
         model = self.train_model(X, y)
         coef = model.coef_[0]
         print("Coeffiencent norm squared:", (np.linalg.norm(model.coef_[0])) ** 2)
         print("Intercept:", model.intercept_)
 
-        print(
-            "Class Probabilites of model coefficients:",
-            model.predict_proba(coef.reshape(1, -1)),
-        )
+        # print(
+        #     "Class Probabilites of model coefficients:",
+        #     model.predict_proba(coef.reshape(1, -1)),
+        # )
 
         # Original ideal query class probabilities
         # orig_ideal_query_path = (
@@ -262,21 +295,19 @@ class IdealQueryGeneration2(SearchAndEval):
         if num_save_terms is not None:
             qvec.trim(num_save_terms)
         ap, run = self.computeAP_and_run(qid, qvec, num_top_docs=1000)
-        print(f"AP acheived: {ap}")
+        print(f"AP acheived: {ap}\n")
 
         # Save run, ap, weights
-        print("Saving AP, run and weights...", end=" ")
         ap_dict = {qid: ap}
         store_run(run, run_save_file, runid, append=True)
         store_ap(ap_dict, ap_save_file, append=True)
         qvec.store_txt(qid, weight_save_file, append=True)
-        print("Done!")
-        print()
 
     def run(
         self,
         qids,
         num_after_chi2_terms,
+        num_after_rocchio_terms,
         var_thershold,
         runid,
         num_save_terms,
@@ -291,6 +322,7 @@ class IdealQueryGeneration2(SearchAndEval):
             self.process_qid(
                 qid,
                 num_after_chi2_terms,
+                num_after_rocchio_terms,
                 var_thershold,
                 runid,
                 num_save_terms,
@@ -308,12 +340,12 @@ if __name__ == "__main__":
     iqg2 = IdealQueryGeneration2(index_dir, stopwords_path, qrel_path)
     qid_range = chain(range(301, 451), range(601, 701))
 
-    #####################################
-    ideal_q_runid = "ideal_query_chi2_lr"
-    num_after_chi2_terms = 10000
-    var_thershold = 1e-4
-    num_save_terms = 1000
-    # num_save_terms = None  # set to None to save all terms
+    # GLOBALS ##############################
+    ideal_q_runid = "ideal_query_logreg"
+    var_thershold = 1e-4  # set to None to filter all terms
+    num_after_chi2_terms = 10000  # set to None filter all terms
+    num_after_rocchio_terms = 200  # set to None to filter all terms
+    num_save_terms = 1000  # set to None to save all terms
     #####################################
 
     ideal_query_path = os.path.join(ROOT_DIR, "ideal-queries", "trec678")
@@ -345,6 +377,7 @@ if __name__ == "__main__":
     iqg2.run(
         qid_range,
         num_after_chi2_terms,
+        num_after_rocchio_terms,
         var_thershold,
         ideal_q_runid,
         num_save_terms,

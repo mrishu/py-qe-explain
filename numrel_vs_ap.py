@@ -7,7 +7,7 @@ import os
 # File paths (edit as needed)
 num_rel_docs_file = "./num_rel_docs.txt"
 ap_files = [
-    "./ideal-queries/trec678/aps/ideal_query.ap",
+    "./ideal-queries/trec678/aps/ideal_query_torch_linear.ap",
     "./ideal-queries/trec678/aps/ideal_query_chi2_lr.ap",
 ]  # List your AP files here
 
